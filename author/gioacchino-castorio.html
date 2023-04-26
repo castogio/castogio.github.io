@@ -20,10 +20,10 @@
 
             <aside id="featured" class="body">
                 <article>
-                    <h1 class="entry-title"><a href="https://castogio.github.io/demystifying-modulation-techniques-with-bpsk.html">Demystifying modulation techniques with BPSK</a></h1>
+                    <h1 class="entry-title"><a href="https://castogio.github.io/troubleshooting-wpa2-enterprise-with-meraki-cloud-authentication.html">Troubleshooting WPA2-Enterprise with Meraki Cloud Authentication</a></h1>
 <footer class="post-info">
-        <abbr class="published" title="2023-04-18T22:11:00+01:00">
-                Published: Tue 18 April 2023
+        <abbr class="published" title="2023-04-26T23:00:00+01:00">
+                Published: Wed 26 April 2023
         </abbr>
 
         <address class="vcard author">
@@ -31,110 +31,135 @@
         </address>
 <p>In <a href="https://castogio.github.io/category/80211.html">802.11</a>.</p>
 
-</footer><!-- /.post-info --><p>The multitude of Modulation and Coding Schemes (MCSs) 
-introduced in IEEE802.11 for the VHT and HE PHYs may look like magical 
-spells even for the seasoned wireless engineer. At the start of my journey 
-as a telecommunications engineer, I was particularly
-fascinated by the mathematics behind how to carry information from a transmitter
-(TX) to a receiver (RX). I believe it might be worth it to take a step back
-and get a mathematical intuition of what is happening behind the scenes when 
-a STA interacts with the wireless medium.</p>
-<p>Assuming we can transmit the signal wave <em>s(t)</em>, as in the equation below, where
-A is the amplitude, f is the signal frequency, and the time, we could consider
-representing 1's as <em>s(t)</em> and 0's as <em>-s(t)</em>. </p>
-<!-- s(t) = A*cos(2*pi*f*t) -->
-<!-- https://latex.codecogs.com/eqneditor/editor.php -->
+</footer><!-- /.post-info --><!-- write an introduction -->
+<p>I was tinkering in my lab with my very old MacBook, now running Windows 10, 
+a few days ago, looking for ways to simplify my troubleshooting activities at work.
+There is a service that the Cisco Meraki access points offer, called Meraki 
+Cloud Authentication, which offers an authentication server for 802.1X running
+24/7 on their server. This uses the EAP-PEAP/EAP-TLS method to authenticate
+users who provide an email username and a password. </p>
+<p>The email requested by the server is case-sensitive. Unsurprisingly an easy way 
+to fail authentication is simply to write the correct email with one or more 
+characters in the wrong case. Another common L8 issue is, of course, typing the
+wrong password because the user forgot it.</p>
+<p>In this blog post, I would like to present some useful tips to troubleshoot
+incorrect authentication credentials using the Event Viewer in Windows 10.
+This tool ships natively with the OS and it provides a step-by-step report of
+what is happening when connecting to an SSID, as it allows monitoring 
+the service called "<em>WLAN-AutoConfig</em>," in charge of the 802.11 state machine.</p>
+<h2>Accessing the Event Viewer</h2>
+<p>Let's start by accessing the logs. This is easily done by opening
+the Start menu and searching for "Event Viewer." 
+You can now navigate as follows in the menu on the left (each section is a 
+dropdown item you can unfold):</p>
+<ol>
+<li>Applications and Service Logs  &gt; Microsoft &gt; Windows &gt; WLAN-AutoConfig.</li>
+<li>Click on the WLAN-Autoconfig item.</li>
+<li>Right-click on the "Operational" logs and make sure the log is enabled.
+   (you will see the button "Disable Log").</li>
+<li>Right-click on the "Operational" logs to make sure you opened the logs.</li>
+</ol>
+<p>Most likely, you will see a list of events in the centre frame of the Event
+Viewer; this is normal, and these logs refer to previous operations executed 
+by your wireless network card.</p>
+<h2>Dissecting a successful authentication</h2>
+<p>From the perspective of the Client station, there is no difference between a 
+server located on-premises or in the cloud. Referring to the sequence diagram
+shown below,
+the administrator will notice a negligible deviation from what they may expect 
+from standard 802.1X authentication processes; however, the actual RADIUS
+exchanges are tunnelled between the Meraki APs (MR) and the cloud server.
+You will not be able to see the traffic being sent and received on the 
+distribution system, as the packets are encrypted.</p>
+<!-- exchange UML -->
 <p><center>
-    <img alt="Simple cosine signal" src="https://castogio.github.io/images/cosine_base_signal.png">
+    <img alt="meraki cloud auth exchange diagram" src="https://castogio.github.io/images/meraki_auth_troubleshooting/meraki_auth_exchange.png">
 </center></p>
-<p>The receiver station would immediately recognise what value we are transmitting 
-by comparing what is received with the reference signal,
-which is assumed to be known. 
-The figure below shows the comparison between the reference signal and what can 
-be seen at the receiving station, considering path loss exclusively and ignoring
-additional effects such as multipath; the picture shows a one being received,
-followed by a zero.</p>
+<p>You can perform a monitor mode packet capture to EAP traffic over the air.
+The following exchange can be seen:</p>
+<ol>
+<li>There is Identity Request/Response exchange where the client sends 
+   the username in clear text (we will not be so lucky with the password).</li>
+<li>The authentication server sends an MD5 request.</li>
+<li>The client rejects it with a Negative Acknowledgement (NAK) and requests
+   to use Protected EAP (PEAP).</li>
+<li>The server agrees to use PEAP/EAP-TLS.</li>
+<li>The client and the server perform the encrypted EAP protocol exchanges.</li>
+<li>The server sends an EAP Success message to the client.</li>
+<li>The 4-way RSN handshake can start.</li>
+</ol>
+<p>NOTE: you may notice that the client wireless MAC address is translated by
+Wireshark as "Apple." This is expected as I was running Windows dual-booted
+on a MacBook.</p>
+<!-- packet capture success -->
 <p><center>
-    <img alt="periodic" src="https://castogio.github.io/images/bpsk_periodic_zero_received_vs_reference.png">
+    <img alt="packet capture of EAP success" src="https://castogio.github.io/images/meraki_auth_troubleshooting/SUCCESS_meraki_auth_exchange.png">
 </center></p>
-<p>The carrier signal s(t) is not enough to transmit any meaningful
-information in real life: the time variable t is an infinite
-<a href="https://en.wikipedia.org/wiki/Real_number">real number</a> and s(t) repeats
-periodically with no start or end in time. We are busy people and we want
-to transmit more than one bit in perpetuity, so we can define a new rectangular
-function <em>p(t)</em> which is not-null only for <em>0 &lt;= t &lt;= T</em>, where <em>T = 1/f</em> is the
-"period" of the signal s(t). </p>
-<!-- 
-p(t) =\begin{cases}
-      1~if~0 \leq t \leq T\\
-      0~otherwise
-\end{cases}
--->
-<!-- https://latex.codecogs.com/eqneditor/editor.php -->
+<p>You can follow the exchanges described above (and more!) in the Event Viewer,
+which logs every operation and state transition performed by the 802.11 state 
+machine in chronological order from bottom to top (an event lower in the list
+happened before the ones on top of it) as you can see in the picture below. 
+We will focus on the logs whose Task Category is <em>OneXAuthentication</em> (i.e. 
+they are associated with 802.1X). I highlighted the last 1X event, showing a 
+successful authentication and specifying the correct email used as "Identity," 
+here shown as "hello@correct.com" (just an example).</p>
+<!-- log success -->
 <p><center>
-    <img alt="rectangular function" src="https://castogio.github.io/images/rect_function.png">
+    <img alt="EAP log success on Windows" src="https://castogio.github.io/images/meraki_auth_troubleshooting/capture_success_windows.png">
 </center></p>
-<p>Multiplying the two functions <em>g(t) = s(t)p(t)</em>, we get a limited section of the
-original signal, namely a cycle of the cosine wave.</p>
+<h2>Dissecting a failed authentication</h2>
+<p>Despite what we have seen in the previous section, the operation may not
+be very smooth when your user report issues with "connecting with the Wi-Fi".
+You may not have immediate access to your trusty sidekick
+or a different client to collect monitor mode capture. Nonetheless, you can
+still open the Event Viewer, ask the user to attempt a connection, see if fail
+miserably, and review what is being reported in the logs.</p>
+<!-- log failure -->
 <p><center>
-    <img alt="Windowed cosine" src="https://castogio.github.io/images/windowed_signal.png">
+    <img alt="EAP log failure on Windows" src="https://castogio.github.io/images/meraki_auth_troubleshooting/capture_FAILURE_windows.png">
 </center></p>
-<p>This signal p(t) is extremely powerful because it lets us move its "windowing" 
-effect by simply shifting its "up" value by the period T to the left or right
-over the time axis so that p(t-kT) = 1 for kT &lt;= t &lt;= (k+1)T, where k is any
-<a href="https://en.wikipedia.org/wiki/Integer">integer number</a>. We can shift the
-pulse <em>g(t)</em> by <em>kT</em> as well.</p>
-<p>The windowed signals can be juxtaposed to represent a sequence of 0's and 1's
-fairly easily as the entire signal can be described mathematically as a
-summation <em>S(t)</em>, where N is the number of windows and the coefficient
-<em>c</em> is 1 when transmitting a "one" bit, -1 otherwise.</p>
-<!-- 
-S(t) = \sum_{k=0}^{N-1} c_k*g(t-kT) = \sum_{k=0}^{N-1} c_k*s(t-kT)*p(t-kT)
--->
+<p>The general structure of the reports, as you can see above, did not change much
+from the <em>successful</em> case. In particular, we can see that the client 
+passed the Open Authentication and the Association phases, but it stalled
+when attempting the 802.1X operation.</p>
+<p>Opening the log in question (helpfully marked as an "Error"), we can see that
+WLAN-AutoConfig reports the fact that this was an <em>explicit</em> EAP authentication
+failure and that we sent the identity "HELLO@correct.com" (which we know is 
+incorrect, as seen previously).</p>
+<p>Being in my laboratory, I could take the packet capture and indeed all the EAP 
+exchanges seen previously show up again, with the sole exception of the last
+frame which contains an EAP failure message (matching what was reported in the
+Event Viewer).</p>
+<!-- packet capture failure -->
 <p><center>
-    <img alt="pulse train formula" src="https://castogio.github.io/images/pulse_train_formula.png">
+    <img alt="packet capture of EAP failure" src="https://castogio.github.io/images/meraki_auth_troubleshooting/FAIL_meraki_auth_exchange.png">
 </center></p>
-<p>The following image shows an example of the application of the above formula
-when transmitting a zero followed by a one; the receiver can compare its
-local reference to the received signal. Note that this example
-considers the existence of some attenuation at RX due to Free Space Path Loss
-while ignoring other detrimental effects such as multi-path.</p>
-<p><center>
-    <img alt="pulse train plot" src="https://castogio.github.io/images/bpsk_received_vs_reference.png">
-</center></p>
-<p>You might have noticed that some level of time synchronisation is
-needed between the reference and the received signal to allow effective
-demodulation. This fact is true regardless of the modulation technique in use,
-and it intuitively justifies the existence of preamble sequences in the 
-IEEE802.11 PHY Protocol Data Units (PPDUs).</p>
-<p>In conclusion, we managed to transmit a sequence of single bits leveraging the 
-simple fact that our RX can discriminate between a positive 
-or a negative coefficient for the signal. 
-We defined a signal constellation containing two pints which are shifted
-180 degrees between each other: this technique is commonly referred to as
-Binary Phase Shift Keying (BPSK) because the same base carrier <em>s(t)</em> can 
-assume two different phase configurations to represent a single bit.</p>
-<p><center>
-    <img alt="pulse train plot" src="https://castogio.github.io/images/bpsk_constellation.png">
-</center></p>
-<p>Intuitively, we can expand the number of transmitted bits by following the same
-principles of "tweak a parameter and compare to a reference" as described above.
-We will explore Amplitude Shift Keying (ASK), Quadrature Phase Shift Keying
-(QPSK), and Quadrature Amplitude Modulation (QAM) in future blog posts.</p>
-<p>Until next time!</p>
+<p>Having been burnt in the past, I would recommend you cross-check and confirm the
+reports from any facility using some additional external tools. In the scenario
+described in this post, the Event Viewer correctly pointed to the root cause, 
+but it might not be direct when it comes to more complex problems (also, bugs
+are a thing). Seeing an EAP failure in the packet capture confirmed the fact.  </p>
+<h2>Conclusion and Lesson Learned</h2>
+<p>The main takeaway of this little demo is "<em>know your tools</em>".
+Client devices offer a multitude of built-in programs that will immensely 
+simplify your day-to-day as a wireless analyst, especially when you do not 
+have access to more sophisticated equipment. The Event Viewer is the perfect 
+example of a tool that ships with Windows and can show you what the client
+is doing, what <strong>it believes</strong> is going wrong, and, potentially, how to 
+remediate the issue, as in our case.</p>
 <h3>Bibliography</h3>
 <ul>
-<li>Moher, Michael, and S. Haykin. Communication Systems, 5th ed, Chapter 4. 
-  Wiley, 2010.</li>
-<li>Carpenter, T. CWAP-404: Certified Wireless Analysis Professional, Chapter 3. 
-  Certitrek Publishing, 2021</li>
+<li>“Managing User Accounts Using Meraki Cloud Authentication.” 
+   Cisco Meraki, Feb. 2023, https://bit.ly/3UQh38T. Accessed 25 Apr. 2023.</li>
+<li>"Event Viewer." Microsoft, 
+   Jan. 2019, https://bit.ly/41SfPMC. Accessed 26 Apr. 2023.</li>
 </ul>                </article>
             </aside><!-- /#featured -->
                 </ol><!-- /#posts-list -->
 <p class="paginator">
-    Page 1 / 2
+    Page 1 / 3
         <a href="https://castogio.github.io/author/gioacchino-castorio2.html">&raquo;</a>
-        <a href="https://castogio.github.io/author/gioacchino-castorio2.html">&#8649;</a>
+        <a href="https://castogio.github.io/author/gioacchino-castorio3.html">&#8649;</a>
 </p>
                 </section><!-- /#content -->
         <section id="extras" class="body">

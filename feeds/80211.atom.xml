@@ -1,5 +1,131 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Gioacchino's Radio Shack - 802.11</title><link href="https://castogio.github.io/" rel="alternate"></link><link href="https://castogio.github.io/feeds/80211.atom.xml" rel="self"></link><id>https://castogio.github.io/</id><updated>2023-04-18T22:11:00+01:00</updated><entry><title>Demystifying modulation techniques with BPSK</title><link href="https://castogio.github.io/demystifying-modulation-techniques-with-bpsk.html" rel="alternate"></link><published>2023-04-18T22:11:00+01:00</published><updated>2023-04-18T22:11:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-04-18:/demystifying-modulation-techniques-with-bpsk.html</id><summary type="html">&lt;p&gt;The multitude of Modulation and Coding Schemes (MCSs) 
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Gioacchino's Radio Shack - 802.11</title><link href="https://castogio.github.io/" rel="alternate"></link><link href="https://castogio.github.io/feeds/80211.atom.xml" rel="self"></link><id>https://castogio.github.io/</id><updated>2023-04-26T23:00:00+01:00</updated><entry><title>Troubleshooting WPA2-Enterprise with Meraki Cloud Authentication</title><link href="https://castogio.github.io/troubleshooting-wpa2-enterprise-with-meraki-cloud-authentication.html" rel="alternate"></link><published>2023-04-26T23:00:00+01:00</published><updated>2023-04-26T23:00:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-04-26:/troubleshooting-wpa2-enterprise-with-meraki-cloud-authentication.html</id><summary type="html">&lt;!-- write an introduction --&gt;
+&lt;p&gt;I was tinkering in my lab with my very old MacBook, now running Windows 10, 
+a few days ago, looking for ways to simplify my troubleshooting activities at work.
+There is a service that the Cisco Meraki access points offer, called Meraki 
+Cloud Authentication, which offers an authentication server for …&lt;/p&gt;</summary><content type="html">&lt;!-- write an introduction --&gt;
+&lt;p&gt;I was tinkering in my lab with my very old MacBook, now running Windows 10, 
+a few days ago, looking for ways to simplify my troubleshooting activities at work.
+There is a service that the Cisco Meraki access points offer, called Meraki 
+Cloud Authentication, which offers an authentication server for 802.1X running
+24/7 on their server. This uses the EAP-PEAP/EAP-TLS method to authenticate
+users who provide an email username and a password. &lt;/p&gt;
+&lt;p&gt;The email requested by the server is case-sensitive. Unsurprisingly an easy way 
+to fail authentication is simply to write the correct email with one or more 
+characters in the wrong case. Another common L8 issue is, of course, typing the
+wrong password because the user forgot it.&lt;/p&gt;
+&lt;p&gt;In this blog post, I would like to present some useful tips to troubleshoot
+incorrect authentication credentials using the Event Viewer in Windows 10.
+This tool ships natively with the OS and it provides a step-by-step report of
+what is happening when connecting to an SSID, as it allows monitoring 
+the service called "&lt;em&gt;WLAN-AutoConfig&lt;/em&gt;," in charge of the 802.11 state machine.&lt;/p&gt;
+&lt;h2&gt;Accessing the Event Viewer&lt;/h2&gt;
+&lt;p&gt;Let's start by accessing the logs. This is easily done by opening
+the Start menu and searching for "Event Viewer." 
+You can now navigate as follows in the menu on the left (each section is a 
+dropdown item you can unfold):&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Applications and Service Logs  &amp;gt; Microsoft &amp;gt; Windows &amp;gt; WLAN-AutoConfig.&lt;/li&gt;
+&lt;li&gt;Click on the WLAN-Autoconfig item.&lt;/li&gt;
+&lt;li&gt;Right-click on the "Operational" logs and make sure the log is enabled.
+   (you will see the button "Disable Log").&lt;/li&gt;
+&lt;li&gt;Right-click on the "Operational" logs to make sure you opened the logs.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Most likely, you will see a list of events in the centre frame of the Event
+Viewer; this is normal, and these logs refer to previous operations executed 
+by your wireless network card.&lt;/p&gt;
+&lt;h2&gt;Dissecting a successful authentication&lt;/h2&gt;
+&lt;p&gt;From the perspective of the Client station, there is no difference between a 
+server located on-premises or in the cloud. Referring to the sequence diagram
+shown below,
+the administrator will notice a negligible deviation from what they may expect 
+from standard 802.1X authentication processes; however, the actual RADIUS
+exchanges are tunnelled between the Meraki APs (MR) and the cloud server.
+You will not be able to see the traffic being sent and received on the 
+distribution system, as the packets are encrypted.&lt;/p&gt;
+&lt;!-- exchange UML --&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="meraki cloud auth exchange diagram" src="https://castogio.github.io/images/meraki_auth_troubleshooting/meraki_auth_exchange.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;You can perform a monitor mode packet capture to EAP traffic over the air.
+The following exchange can be seen:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;There is Identity Request/Response exchange where the client sends 
+   the username in clear text (we will not be so lucky with the password).&lt;/li&gt;
+&lt;li&gt;The authentication server sends an MD5 request.&lt;/li&gt;
+&lt;li&gt;The client rejects it with a Negative Acknowledgement (NAK) and requests
+   to use Protected EAP (PEAP).&lt;/li&gt;
+&lt;li&gt;The server agrees to use PEAP/EAP-TLS.&lt;/li&gt;
+&lt;li&gt;The client and the server perform the encrypted EAP protocol exchanges.&lt;/li&gt;
+&lt;li&gt;The server sends an EAP Success message to the client.&lt;/li&gt;
+&lt;li&gt;The 4-way RSN handshake can start.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;NOTE: you may notice that the client wireless MAC address is translated by
+Wireshark as "Apple." This is expected as I was running Windows dual-booted
+on a MacBook.&lt;/p&gt;
+&lt;!-- packet capture success --&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="packet capture of EAP success" src="https://castogio.github.io/images/meraki_auth_troubleshooting/SUCCESS_meraki_auth_exchange.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;You can follow the exchanges described above (and more!) in the Event Viewer,
+which logs every operation and state transition performed by the 802.11 state 
+machine in chronological order from bottom to top (an event lower in the list
+happened before the ones on top of it) as you can see in the picture below. 
+We will focus on the logs whose Task Category is &lt;em&gt;OneXAuthentication&lt;/em&gt; (i.e. 
+they are associated with 802.1X). I highlighted the last 1X event, showing a 
+successful authentication and specifying the correct email used as "Identity," 
+here shown as "hello@correct.com" (just an example).&lt;/p&gt;
+&lt;!-- log success --&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="EAP log success on Windows" src="https://castogio.github.io/images/meraki_auth_troubleshooting/capture_success_windows.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;h2&gt;Dissecting a failed authentication&lt;/h2&gt;
+&lt;p&gt;Despite what we have seen in the previous section, the operation may not
+be very smooth when your user report issues with "connecting with the Wi-Fi".
+You may not have immediate access to your trusty sidekick
+or a different client to collect monitor mode capture. Nonetheless, you can
+still open the Event Viewer, ask the user to attempt a connection, see if fail
+miserably, and review what is being reported in the logs.&lt;/p&gt;
+&lt;!-- log failure --&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="EAP log failure on Windows" src="https://castogio.github.io/images/meraki_auth_troubleshooting/capture_FAILURE_windows.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;The general structure of the reports, as you can see above, did not change much
+from the &lt;em&gt;successful&lt;/em&gt; case. In particular, we can see that the client 
+passed the Open Authentication and the Association phases, but it stalled
+when attempting the 802.1X operation.&lt;/p&gt;
+&lt;p&gt;Opening the log in question (helpfully marked as an "Error"), we can see that
+WLAN-AutoConfig reports the fact that this was an &lt;em&gt;explicit&lt;/em&gt; EAP authentication
+failure and that we sent the identity "HELLO@correct.com" (which we know is 
+incorrect, as seen previously).&lt;/p&gt;
+&lt;p&gt;Being in my laboratory, I could take the packet capture and indeed all the EAP 
+exchanges seen previously show up again, with the sole exception of the last
+frame which contains an EAP failure message (matching what was reported in the
+Event Viewer).&lt;/p&gt;
+&lt;!-- packet capture failure --&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="packet capture of EAP failure" src="https://castogio.github.io/images/meraki_auth_troubleshooting/FAIL_meraki_auth_exchange.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;Having been burnt in the past, I would recommend you cross-check and confirm the
+reports from any facility using some additional external tools. In the scenario
+described in this post, the Event Viewer correctly pointed to the root cause, 
+but it might not be direct when it comes to more complex problems (also, bugs
+are a thing). Seeing an EAP failure in the packet capture confirmed the fact.  &lt;/p&gt;
+&lt;h2&gt;Conclusion and Lesson Learned&lt;/h2&gt;
+&lt;p&gt;The main takeaway of this little demo is "&lt;em&gt;know your tools&lt;/em&gt;".
+Client devices offer a multitude of built-in programs that will immensely 
+simplify your day-to-day as a wireless analyst, especially when you do not 
+have access to more sophisticated equipment. The Event Viewer is the perfect 
+example of a tool that ships with Windows and can show you what the client
+is doing, what &lt;strong&gt;it believes&lt;/strong&gt; is going wrong, and, potentially, how to 
+remediate the issue, as in our case.&lt;/p&gt;
+&lt;h3&gt;Bibliography&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;“Managing User Accounts Using Meraki Cloud Authentication.” 
+   Cisco Meraki, Feb. 2023, https://bit.ly/3UQh38T. Accessed 25 Apr. 2023.&lt;/li&gt;
+&lt;li&gt;"Event Viewer." Microsoft, 
+   Jan. 2019, https://bit.ly/41SfPMC. Accessed 26 Apr. 2023.&lt;/li&gt;
+&lt;/ul&gt;</content><category term="802.11"></category></entry><entry><title>Demystifying modulation techniques with BPSK</title><link href="https://castogio.github.io/demystifying-modulation-techniques-with-bpsk.html" rel="alternate"></link><published>2023-04-18T22:11:00+01:00</published><updated>2023-04-18T22:11:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-04-18:/demystifying-modulation-techniques-with-bpsk.html</id><summary type="html">&lt;p&gt;The multitude of Modulation and Coding Schemes (MCSs) 
 introduced in IEEE802.11 for the VHT and HE PHYs may look like magical 
 spells even for the seasoned wireless engineer. At the start of my journey 
 as a telecommunications engineer, I was particularly

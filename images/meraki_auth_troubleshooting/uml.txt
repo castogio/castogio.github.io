@@ -1,0 +1,12 @@
+@startuml
+Client --> MR: 802.1X start (optional)
+Client <- MR: EAP Request (Identity)
+Client -> MR: EAP Response (Identity)
+MR --> Meraki_Cloud_RADIUS: RADIUS Access-Request (tunnelled)
+Client <-- Meraki_Cloud_RADIUS: EAP-MD5 Request
+Client -> Meraki_Cloud_RADIUS: NACK + EAP-PEAP desired
+Client <- Meraki_Cloud_RADIUS: EAP-PEAP/EAP-TLS Request
+Client --> Meraki_Cloud_RADIUS: EAP-PEAP exchange
+Client <-- Meraki_Cloud_RADIUS
+Client <- Meraki_Cloud_RADIUS: EAP Success
+@enduml
