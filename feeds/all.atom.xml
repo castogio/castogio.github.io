@@ -1,5 +1,190 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Gioacchino's Radio Shack</title><link href="https://castogio.github.io/" rel="alternate"></link><link href="https://castogio.github.io/feeds/all.atom.xml" rel="self"></link><id>https://castogio.github.io/</id><updated>2023-04-26T23:00:00+01:00</updated><entry><title>Troubleshooting WPA2-Enterprise with Meraki Cloud Authentication</title><link href="https://castogio.github.io/troubleshooting-wpa2-enterprise-with-meraki-cloud-authentication.html" rel="alternate"></link><published>2023-04-26T23:00:00+01:00</published><updated>2023-04-26T23:00:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-04-26:/troubleshooting-wpa2-enterprise-with-meraki-cloud-authentication.html</id><summary type="html">&lt;!-- write an introduction --&gt;
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Gioacchino's Radio Shack</title><link href="https://castogio.github.io/" rel="alternate"></link><link href="https://castogio.github.io/feeds/all.atom.xml" rel="self"></link><id>https://castogio.github.io/</id><updated>2023-05-01T22:11:00+01:00</updated><entry><title>About Me</title><link href="https://castogio.github.io/about-me.html" rel="alternate"></link><published>2023-05-01T22:11:00+01:00</published><updated>2023-05-01T22:11:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-05-01:/about-me.html</id><summary type="html">&lt;p&gt;My name is Gioacchino Castorio. but people call me Jack or Kino.
+By day I troubleshoot dot11 wireless network, by night I like to call myself
+MI0YTF as an amateur radio operator.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="my picture" src="https://castogio.github.io/images/personal_intro/profile_pic.png"&gt;&lt;/p&gt;
+&lt;p&gt;I spend most of my time working out, going for walks, reading technical books, 
+or writing my own …&lt;/p&gt;</summary><content type="html">&lt;p&gt;My name is Gioacchino Castorio. but people call me Jack or Kino.
+By day I troubleshoot dot11 wireless network, by night I like to call myself
+MI0YTF as an amateur radio operator.&lt;/p&gt;
+&lt;p&gt;&lt;img alt="my picture" src="https://castogio.github.io/images/personal_intro/profile_pic.png"&gt;&lt;/p&gt;
+&lt;p&gt;I spend most of my time working out, going for walks, reading technical books, 
+or writing my own video games and utility programs in Python.&lt;/p&gt;
+&lt;p&gt;I created this blog to share tips and tricks when troubleshooting, avoiding some
+common pitfalls, while heavily relying on network programmability and automation 
+which have greatly simplified my day-to-day.&lt;/p&gt;
+&lt;h2&gt;Contacts&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;My LinkedIn Profile: https://uk.linkedin.com/in/gioacchinocastorio&lt;/li&gt;
+&lt;li&gt;GitHub account: https://github.com/castogio&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;My (current) certifications&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Certified Wireless Analysis Professional (CWAP), CWNP&lt;/li&gt;
+&lt;li&gt;Certified Wireless Security Professional (CWSP), CWNP&lt;/li&gt;
+&lt;li&gt;Certified Wireless Design Professional (CWDA), CWNP&lt;/li&gt;
+&lt;li&gt;Certified Wireless Network Administrator (CWNA), CWNP&lt;/li&gt;
+&lt;li&gt;Certified Wireless IoT Solutions Administrator (CWISA), CWNP&lt;/li&gt;
+&lt;li&gt;Cisco Certified Network Professional (CCNP), Cisco&lt;/li&gt;
+&lt;li&gt;Cisco Certified Specialist - Enterprise Design (ENSLD), Cisco&lt;/li&gt;
+&lt;li&gt;Cisco DevNet Associate (DEVASC), Cisco&lt;/li&gt;
+&lt;li&gt;Certified Professional in Python Programming 1 (PCPP1), Python Institute&lt;/li&gt;
+&lt;li&gt;Amateur Full Radio Licence, Ofcom&lt;/li&gt;
+&lt;/ul&gt;</content><category term="About Me"></category></entry><entry><title>Introduction to RX-SOP Configuration</title><link href="https://castogio.github.io/introduction-to-rx-sop-configuration.html" rel="alternate"></link><published>2023-05-01T12:00:00+01:00</published><updated>2023-05-01T12:00:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-05-01:/introduction-to-rx-sop-configuration.html</id><summary type="html">&lt;p&gt;Cisco Receiver Start of Packet Detection Threshold (RX-SOP) is 
+a feature available on a multitude of enterprise access points, but experience 
+taught me it is often misunderstood by junior wireless engineers.&lt;/p&gt;
+&lt;p&gt;In a sentence, the RX-SOP configuration declares the Wi-Fi power required for an 
+access point to pick up signals …&lt;/p&gt;</summary><content type="html">&lt;p&gt;Cisco Receiver Start of Packet Detection Threshold (RX-SOP) is 
+a feature available on a multitude of enterprise access points, but experience 
+taught me it is often misunderstood by junior wireless engineers.&lt;/p&gt;
+&lt;p&gt;In a sentence, the RX-SOP configuration declares the Wi-Fi power required for an 
+access point to pick up signals, demodulation and then start decoding the 
+physical layer protocol data unit (PPDU). 
+This definition begs the question: why is such a feature required?
+I believe that having a clear picture of how signal decay 
+over distance is necessary to understand the implications of RX-SOP.
+​&lt;/p&gt;
+&lt;h2&gt;RF propagation refresher&lt;/h2&gt;
+&lt;p&gt;​
+We call an "isotropic radiator" an intentional radiator (IR) with no spatial 
+dimensions (i.e. a dot) in the infinite void, emitting a wave
+signal of amplitude P(tx) in all directions. This entity is, of course, ideal 
+and it cannot be implemented in real life., but it will help us describe
+the behaviour of radiation moving through space. &lt;/p&gt;
+&lt;!-- The power emitted is maximum at the IR and equal to P(tx).  --&gt;
+&lt;p&gt;A receiver at distance &lt;em&gt;d&lt;/em&gt; for the IR would see a different power level 
+&lt;em&gt;strictly less&lt;/em&gt; than P(tx), as the transmitted amount spreads 
+to all directions; we can name the received power P(rx).
+In the case of an isotropic IR, we can easily compute P(rx)
+as the power spreads over a spherical wavefront.
+The &lt;em&gt;power density I&lt;/em&gt; at distance &lt;em&gt;d&lt;/em&gt; on a punctiform section of the sphere
+is defined as follows:
+​&lt;/p&gt;
+&lt;!-- I = \frac{P_{tx}}{2\pi d^{2}} --&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="transmit power density formula" src="https://castogio.github.io/images/rxsop_intro/power_density_formula.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;In other words, the value "I" represents how the transmitted power distributes 
+in a point at distance &lt;em&gt;d&lt;/em&gt; from the IR. It also lets us compute how much power 
+P(rx) can be captured by a punctiform section of the receiving antenna. &lt;/p&gt;
+&lt;p&gt;Multiplying &lt;em&gt;I&lt;/em&gt; by the &lt;em&gt;effective area&lt;/em&gt; of the antenna will
+give us the total received power. The effective area depends on the directivity 
+of the receiving antenna in general. However, when the receiver is far away from 
+the transmitter (at least two or three times the wavelength &lt;em&gt;lambda&lt;/em&gt;), it can be 
+&lt;a href="https://bit.ly/40WJMdj"&gt;proven&lt;/a&gt; that:
+​&lt;/p&gt;
+&lt;!-- P_{rx} = I A_{eff} = \frac{P_{tx}}{2\pi d^2}A_{eff} = 
+    P_{tx} (\frac{\lambda}{2 \pi d})^2  = FSPL(d) * P_{tx}
+--&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="received power formula" src="https://castogio.github.io/images/rxsop_intro/received_power_formula.png"&gt;
+&lt;/center&gt;
+​
+As you can see from the above, the distance &lt;em&gt;d&lt;/em&gt; contributes significantly to
+the power loss in ideal conditions. We call this effect the Free 
+Space Path Loss (FSPL). At a distance of 1 m from the IR, regardless of the
+transmitted power, P(rx) is approximately 40%
+less than the transmitted power. The figure below shows the decay of the 
+received power for varying values of the distance &lt;em&gt;d&lt;/em&gt; when the transmit power 
+P(tx) = 30 dBm and the lambda = 6 cm (frequency = 5 GHz) are set:&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="rx power delay FSPL" src="https://castogio.github.io/images/rxsop_intro/fspl_grapth.png"&gt;
+&lt;/center&gt;
+​
+What we described superimposes to other detrimental effects, 
+(such as material absorption) which are effectively multiplicative factors in 
+the formula for P(rx) and it makes the curve decay faster.&lt;/p&gt;
+&lt;p&gt;​&lt;/p&gt;
+&lt;h2&gt;RX-SOP operations&lt;/h2&gt;
+&lt;p&gt;​
+Having a clearer picture of the harshness of the RF environment, the receiver 
+needs to detect between actual signals, which intensity may be comparable to a 
+whisper in a noisy environment. This is when RX-SOP comes into play.&lt;/p&gt;
+&lt;p&gt;There is a power level called "sensitivity," which is the signal strength 
+(expressed in dBm) of the weakest signal that the AP can distinguish from 
+the background noise and process successfully.
+RX-SOP does not alter the sensitivity of your access point. On the other hand, 
+changing the RX-SOP level forces the AP to &lt;em&gt;actively ignore&lt;/em&gt; signals below a 
+certain power in dBm. For instance, Cisco Meraki APs use -95 dBm by default when
+enabled on the Dashboard.&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;
+&lt;img alt="meraki rx-sop default" src="https://castogio.github.io/images/rxsop_intro/meraki_rx_sop_default.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;The described concept may sound familiar to those of you who are amateur radio
+operators as this is a form of 
+"&lt;a href="https://en.wikipedia.org/wiki/Squelch"&gt;carrier squelch&lt;/a&gt;", 
+i.e. suppressing the receiver output if the input signal is not strong enough. 
+You can see the effects of RX-SOP muting when the level is set to -70 dBm:
+​&lt;/p&gt;
+&lt;!-- SEQUENCE DIAGRAM
+    @startuml
+    Client -[#green]&gt; AP: frame received at -60 dBm (&gt; -70 dBm)
+    AP -[#green]&gt; AP: PROCESSED
+    Client -[#green]&gt; AP: signal -50 dBm (&gt; -70 dBm)
+    AP -[#green]&gt; AP: PROCESSED
+    Client -[#red]&gt; AP: signal -75 dBm (&lt; -70 dBm)
+    Client -[#red]&gt; AP: signal -71 dBm (&lt; -70 dBm)
+    Client -[#red]&gt; AP: signal -80 dBm (&lt; -70 dBm)
+    @enduml
+--&gt;
+
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="RX-SOP operatiomns" src="https://castogio.github.io/images/rxsop_intro/rx_sop_operation.png"&gt;
+&lt;/center&gt;
+​
+Quoting from Cisco, this feature is "ideal for high-density environments [...]
+where there are a large number of client devices connected per AP [... where
+...] the smaller the cell size, the better."
+​
+The benefit might come from the fact that the AP will not reset its 
+Network Allocation Vector (NAV) timer when receiving a signal below the 
+threshold so that it can start transmitting relatively more frequently.
+​
+I saw this configuration altered in the wild by inexperienced administrators and 
+troubleshooters without properly validating its effect on the environment,
+especially to address the issue of sticky clients. The latter is not advisable:
+the RX-SOP is a receive-only configuration and it applies &lt;strong&gt;only&lt;/strong&gt; to the AP
+side, while the client will continue receiving transmissions from the AP
+as if nothing changed. The client may send a frame using its estimated 
+"correct" power level for the AP to receive, while the AP ignores
+the frame as the received signal strength is not above the set threshold. This
+behaviour may lead to excessive retransmissions and client disconnections in
+the worst scenarios, especially at the boundary of the cell coverage where the
+asymmetry may be felt the most.
+A better result in reducing &lt;em&gt;bidirectionally&lt;/em&gt; the cell size
+could have been accomplished by simply reducing the AP transmit power, while 
+guaranteeing appropriate primary and secondary coverage.
+​&lt;/p&gt;
+&lt;h2&gt;Final remarks&lt;/h2&gt;
+&lt;p&gt;​
+Altering the default value of RX-SOP is a risky matter leading to unexpected 
+behaviours and interruption of the wireless service if you do not know what
+you are trying to accomplish and you do not have a clear picture of the 
+mathematics behind signal propagation. 
+In general, RX-SOP should not be used without following a well-thought design, 
+followed by validation and tuning after the deployment in high-density 
+environments with many clients (e.g. auditoriums, stadiums). &lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;tl;dr&lt;/strong&gt; -- never shoot off the hip when using RX-SOP, do your
+homework with the design, and consider first decreasing power to reduce cell
+sizes instead.
+​
+​
+​&lt;/p&gt;
+&lt;h3&gt;Bibliography&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;"High Density Experience (HDX) Deployment Guide, Release 8.0." Cisco, 
+   Jun. 2015, https://bit.ly/3oTelUe. Accessed 30 Apr. 2023.&lt;/li&gt;
+&lt;li&gt;"Free-space Path Loss." Scholarly Community Encyclopedia, 
+   Oct. 2022, https://bit.ly/40WJMdj. Accessed 30 Apr. 2023.&lt;/li&gt;
+&lt;li&gt;"Receive Start of Packet (RX-SOP)." Cisco Meraki, 
+   Oct. 2020, https://bit.ly/41R9xxa. Accessed 30 Apr. 2023.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;!-- https://encyclopedia.pub/entry/31362#:~:text=The%20free%2Dspace%20path%20loss%20(FSPL)%20formula%20derives%20from,%CE%BB%204%20%CF%80%20d%20)%202 --&gt;
+&lt;!-- https://www.cisco.com/c/en/us/td/docs/wireless/controller/technotes/8-0/hdx_final/b_hdx_dg_final/high_density_experience_features_added_in_release_8_0.html --&gt;
+&lt;!--
+https://documentation.meraki.com/MR/Radio_Settings/Receive_Start_of_Packet_(RX-SOP)
+--&gt;
+&lt;p&gt;​&lt;/p&gt;</content><category term="802.11"></category></entry><entry><title>Troubleshooting WPA2-Enterprise with Meraki Cloud Authentication</title><link href="https://castogio.github.io/troubleshooting-wpa2-enterprise-with-meraki-cloud-authentication.html" rel="alternate"></link><published>2023-04-26T23:00:00+01:00</published><updated>2023-04-26T23:00:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-04-26:/troubleshooting-wpa2-enterprise-with-meraki-cloud-authentication.html</id><summary type="html">&lt;!-- write an introduction --&gt;
 &lt;p&gt;I was tinkering in my lab with my very old MacBook, now running Windows 10, 
 a few days ago, looking for ways to simplify my troubleshooting activities at work.
 There is a service that the Cisco Meraki access points offer, called Meraki 
@@ -226,4 +411,4 @@ We will explore Amplitude Shift Keying (ASK), Quadrature Phase Shift Keying
   Wiley, 2010.&lt;/li&gt;
 &lt;li&gt;Carpenter, T. CWAP-404: Certified Wireless Analysis Professional, Chapter 3. 
   Certitrek Publishing, 2021&lt;/li&gt;
-&lt;/ul&gt;</content><category term="802.11"></category></entry><entry><title>My First Post</title><link href="https://castogio.github.io/my-first-post.html" rel="alternate"></link><published>2023-04-08T22:11:00+01:00</published><updated>2023-04-08T22:11:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-04-08:/my-first-post.html</id><content type="html">&lt;p&gt;This is just an example!&lt;/p&gt;</content><category term="General"></category></entry></feed>
+&lt;/ul&gt;</content><category term="802.11"></category></entry></feed>
