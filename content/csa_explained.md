@@ -1,5 +1,5 @@
 Title: Channel Switch Announcements explained
-Date: 2023-05-08 12:00
+Date: 2023-05-08 00:01
 Category: 802.11
 
 In this article, I would like to describe what I believe is an interesting 
