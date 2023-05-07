@@ -22,7 +22,7 @@ in two Case Studies for DFS-triggered and RRM-triggered channel switches.
 Please note that this blog post specifically describes the case of APs in a 
 Basic Service Set (BSS).
 
-## How channel wwitches are announced
+## How channel switches are announced
 
 First, we need to clarify where the AP puts Channel Switch Announcements. 
 These CSAs are carried by the _CSA Information Element_ (IE) and the _Extended_
