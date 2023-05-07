@@ -20,7 +20,7 @@ formats as defined in the IEEE802.11-2020 standard, and confirm the behaviours
 in two Case Studies for DFS-triggered and RRM-triggered channel switches.
 Please note that this blog post specifically describes the case of APs in a 
 Basic Service Set (BSS).&lt;/p&gt;
-&lt;h2&gt;How channel wwitches are announced&lt;/h2&gt;
+&lt;h2&gt;How channel switches are announced&lt;/h2&gt;
 &lt;p&gt;First, we need to clarify where the AP puts Channel Switch Announcements. 
 These CSAs are carried by the &lt;em&gt;CSA Information Element&lt;/em&gt; (IE) and the &lt;em&gt;Extended&lt;/em&gt;
 &lt;em&gt;CSA IE&lt;/em&gt; in the following types of frames right before the change is operated:&lt;/p&gt;
