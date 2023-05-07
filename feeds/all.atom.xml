@@ -1,5 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Gioacchino's Radio Shack</title><link href="https://castogio.github.io/" rel="alternate"></link><link href="https://castogio.github.io/feeds/all.atom.xml" rel="self"></link><id>https://castogio.github.io/</id><updated>2023-05-01T22:11:00+01:00</updated><entry><title>About Me</title><link href="https://castogio.github.io/about-me.html" rel="alternate"></link><published>2023-05-01T22:11:00+01:00</published><updated>2023-05-01T22:11:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-05-01:/about-me.html</id><summary type="html">&lt;p&gt;My name is Gioacchino Castorio. but people call me Jack or Kino.
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Gioacchino's Radio Shack</title><link href="https://castogio.github.io/" rel="alternate"></link><link href="https://castogio.github.io/feeds/all.atom.xml" rel="self"></link><id>https://castogio.github.io/</id><updated>2023-05-08T00:01:00+01:00</updated><entry><title>Channel Switch Announcements explained</title><link href="https://castogio.github.io/channel-switch-announcements-explained.html" rel="alternate"></link><published>2023-05-08T00:01:00+01:00</published><updated>2023-05-08T00:01:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-05-08:/channel-switch-announcements-explained.html</id><summary type="html">&lt;p&gt;In this article, I would like to describe what I believe is an interesting 
+mechanic of dot11 wireless networks called &lt;em&gt;Channel Switch Announcement&lt;/em&gt; (CSA). 
+This is often overlooked as it usually works pretty much flawlessly, but it is
+pretty much ubiquitous in today's deployments because admins
+use automatic Resource Radio …&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this article, I would like to describe what I believe is an interesting 
+mechanic of dot11 wireless networks called &lt;em&gt;Channel Switch Announcement&lt;/em&gt; (CSA). 
+This is often overlooked as it usually works pretty much flawlessly, but it is
+pretty much ubiquitous in today's deployments because admins
+use automatic Resource Radio Management (RRM), which may prompt for 
+(frequent) channel changes on the Access Points as they adapt to the surrounding
+RF environment. CSAs are also used whenever a Dynamic Frequency Selection (DFS)
+occurs in the 5 GHz band, and the AP must move to a non-radar channel.&lt;/p&gt;
+&lt;p&gt;The primary goal of CSAs is to allow the AP to change its channel, while keeping
+the clients associated. Of course, the clients have to follow the AP along with 
+the change, and start transmitting on the new channel (they may actually decide
+to simply disassociate).&lt;/p&gt;
+&lt;p&gt;We will explore together the CSA procedures and the Information Element (IE) 
+formats as defined in the IEEE802.11-2020 standard, and confirm the behaviours
+in two Case Studies for DFS-triggered and RRM-triggered channel switches.
+Please note that this blog post specifically describes the case of APs in a 
+Basic Service Set (BSS).&lt;/p&gt;
+&lt;h2&gt;How channel wwitches are announced&lt;/h2&gt;
+&lt;p&gt;First, we need to clarify where the AP puts Channel Switch Announcements. 
+These CSAs are carried by the &lt;em&gt;CSA Information Element&lt;/em&gt; (IE) and the &lt;em&gt;Extended&lt;/em&gt;
+&lt;em&gt;CSA IE&lt;/em&gt; in the following types of frames right before the change is operated:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Beacon Management Frames&lt;/strong&gt; (Wireshark filter: wlan.fc.type_subtype == 8).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Probe Responses&lt;/strong&gt; (Wireshark filter: wlan.fc.type_subtype == 5).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Spectrum Management Action Frames&lt;/strong&gt; (Wireshark filter: wlan.fc.type_subtype == 13).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;You can see an exhibit from Wireshark showing a sequence of Beacon frames and
+an Action frame before a channel switch from Ch 112 to Ch 48.&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="CSAs frames in Wireshark" src="https://castogio.github.io/images/csa_explained/wireshark_list_frames.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;All these frames are &lt;em&gt;broadcast&lt;/em&gt; and they carry information regarding what the
+&lt;em&gt;new channel&lt;/em&gt; will be, and they state how much time is left before the switch, 
+expressed as a multiplicative factor of the 
+TBTT (Target Beacon Transmission Time). 
+I made sure the picture shows them  in a human-friendly format by re-naming the 
+columns, but we will deep dive into the details of the IE in the next sections.&lt;/p&gt;
+&lt;h2&gt;CSA Information Element format&lt;/h2&gt;
+&lt;p&gt;When it comes to Information Elements, the best place where to find clear
+information is the standard paper itself, so this section takes heavily from
+&lt;strong&gt;IEEE 802.11-2020 Section 9.4.2.18&lt;/strong&gt;. The following figure shows the Channel
+Switch Announcement IE format as defined in the standard to "advertise when [an 
+AP] is changing to a new channel and the channel number of the new channel."
+ This IE was introduced in the IEEE 802.11h amendment.&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="CSA element format" src="https://castogio.github.io/images/csa_explained/csa_ie_format.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;The following fields are defined:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The &lt;em&gt;Element ID&lt;/em&gt; (1 byte) is 37.&lt;/li&gt;
+&lt;li&gt;The &lt;em&gt;Channel Switch Mode&lt;/em&gt; Field (1 byte) can assume the value &lt;em&gt;0&lt;/em&gt; when the 
+  client stations and the AP itself can continue exchanging frames before the
+  channel switch happens. If the value is &lt;em&gt;1&lt;/em&gt;, no more frames should be
+  exchanged before the switch.&lt;/li&gt;
+&lt;li&gt;The &lt;em&gt;New Channel Number&lt;/em&gt; field (1 byte) is the channel that will be used
+  by the AP after the switch (you could call it the "new channel").&lt;/li&gt;
+&lt;li&gt;The &lt;em&gt;Channel Switch Count&lt;/em&gt; field (1 byte) is tricky as it states how much
+  time will elapse before the channel change, and it is expressed in multiples 
+  of the TBTT, which is the target amount of time between a Beacon Frame and the 
+  following one for the same BSS (assuming the medium is available). A TBTT is 
+  composed of 100 Time Units (TUs), which in turn is 1024 
+  microseconds. The Channel Switch Count value &lt;em&gt;1&lt;/em&gt; means that the AP will
+  broadcast the next Beacon frame and continue operating in the new channel.
+  Value &lt;em&gt;0&lt;/em&gt; indicates that the actual switch will happen &lt;em&gt;at any time&lt;/em&gt; after the 
+  current frame is broadcasted (i.e. the clients may want to switch immediately
+  to be prepared).&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Extended CSA Information Element format&lt;/h2&gt;
+&lt;p&gt;&lt;strong&gt;IEEE 802.11-2020 Section 9.4.2.52&lt;/strong&gt; defines the Extended Channel Switch
+Announcement IE (E-CSA IE), which specifies if the "BSS is changing to a new 
+channel in the same or a new operating class." This IE was first introduced in 
+the IEEE 802.11y amendment to replace the CSA IE. The latter is still 
+broadcasted for backward compatibility.&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="Extended CSA element format" src="https://castogio.github.io/images/csa_explained/extended_csa_ie.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;This IE carries almost the same information as the CSA IE, so we will focus on 
+a subset of them, which are particularly interesting and justify the existence 
+of the Extended CSA element:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;The &lt;em&gt;Element ID&lt;/em&gt; (1 byte) is 37.&lt;/li&gt;
+&lt;li&gt;The &lt;em&gt;New Operating Class&lt;/em&gt; (1 byte) field specifies the new operating class
+  after the channel switch happens. The values for classes are defined in 
+  "Annex E" of the standard, they depend on the Regulatory Domain as specified 
+  in the Country Element (Section 9.4.2.8), and they indicate the frequency of 
+  the channel, the channel centre frequency, the maximum channel width, and 
+  other behavioural constraints.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2&gt;Case Study: DFS-triggered channel changes&lt;/h2&gt;
+&lt;p&gt;The standard is quite dry, so I recreated the conditions of a channel switch by 
+simulating a DFS event in my lab network to observe what values populated the 
+fields we described in the previous sections.&lt;/p&gt;
+&lt;p&gt;My AP was operating on channel 112, which falls in the 
+Unlicensed National Information Infrastructure 2 Extended (U-NII-2e) range, and 
+it might be affected by DFS events. These events can be caused by radars or any
+other RF radiator mimicking radar. If an event is detected the AP must inform
+the clients that they have to stop transmitting and move to a different channel,
+usually referred to as a "mute" or "fallback" channel. The AP
+and the clients have 10 seconds to leave the DFS channel.&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="Captured CSA IE values for DFS" src="https://castogio.github.io/images/csa_explained/channel_switch_announcement_information_element.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;As you can see in the figure above, the CSA IE states that the new channel is 
+48 (a non-DFS channel in the U-NII-1 range), the switch will happen in 5 TBTTs,
+and the &lt;em&gt;clients should not transmit any more frames over the current channel&lt;/em&gt;.
+The latter command is unsurprising, and it perfectly aligns with the 
+DFS requirement.&lt;/p&gt;
+&lt;p&gt;The AP can send one or more CSA frames in the form of Beacons, Probe Responses 
+and Action Frames to make sure that all its clients move and keep 
+their association status.&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="CapturedExtended CSA IE for DFS" src="https://castogio.github.io/images/csa_explained/extended_channel_switch_announcement_information_element.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;The E-CSA field is contained in the same frames and it carries similar 
+information with the addition of the "New Operating Class" equal to 0x01 
+(hexadecimal). In Europe where I live, class 1 means that the new channel 
+belongs a group composed of Channels 36, 40, 44, and 48 (i.e U-NII-1), the 
+starting frequency for the group is 5 GHz, their channel spacing is 20 MHz, and
+there are no additional behaviour limits (refer to Table E-2 from the standard).&lt;/p&gt;
+&lt;h2&gt;Case Study: RRM-triggered channel changes&lt;/h2&gt;
+&lt;p&gt;Channel changes due to automatic RRM are another very interesting case study,
+probably more relevant than the DFS one, as RRM can kick in very frequently 
+when the RF environment is particularly harsh (e.g. high channel utilisation).&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="Captured CSA for RRM Channel Change" src="https://castogio.github.io/images/csa_explained/csa_channel_change.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;The figure above shows both the CSA and E-CSA IEs when the channel is about to 
+switch to 161. The new operating class is 0x11 (hex for 17), which in Europe 
+refers to the channel set containing 149, 153, 157, 161, 165, and 169 (also
+known as U-NII-3).
+Furthermore, note that the Channel Switch Mode is set to 0 so the 
+clients and the AP may keep exchanging frames until the channel switch, hence 
+virtually nullifying (or minimising as much as possible) any service 
+interruptions during RRM channel switches.&lt;/p&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;IEEE 802.11-2020: Wireless LAN Medium Access Control (MAC) and Physical Layer 
+  (PHY) Specifications (2020 revision), IEEE-SA, 2021&lt;/li&gt;
+&lt;li&gt;Coleman, David D., and David A. Westcott. CWNA Certified Wireless Network 
+  Administrator Study Guide: Exam CWNA-107. John Wiley &amp;amp; Sons, 2018.&lt;/li&gt;
+&lt;/ul&gt;</content><category term="802.11"></category></entry><entry><title>About Me</title><link href="https://castogio.github.io/about-me.html" rel="alternate"></link><published>2023-05-01T22:11:00+01:00</published><updated>2023-05-01T22:11:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-05-01:/about-me.html</id><summary type="html">&lt;p&gt;My name is Gioacchino Castorio. but people call me Jack or Kino.
 By day I troubleshoot dot11 wireless network, by night I like to call myself
 MI0YTF as an amateur radio operator.&lt;/p&gt;
 &lt;p&gt;&lt;img alt="my picture" src="https://castogio.github.io/images/personal_intro/profile_pic.png"&gt;&lt;/p&gt;
