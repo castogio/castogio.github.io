@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Gioacchino's Radio Shack - 802.11</title>
+    <title>Gioacchino's Radio Shack - Gioacchino Castorio</title>
     <meta name="description" content="">
     <meta name="author" content="Gioacchino Castorio">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -56,78 +56,36 @@
 
         
 
+ 
 
     <div class='article'>
-        <div class="content-title">
-            <a href="https://castogio.github.io/decoding-aireos-monitor-mode-captures-on-wireshark.html"><h1>Decoding AireOS monitor mode captures on Wireshark</h1></a>
-Sun 28 May 2023
+        <a href="https://castogio.github.io/demystifying-modulation-techniques-with-bpsk.html"><h2>Demystifying modulation techniques with BPSK</h2></a>
+        <div class= "well small"> Tue 18 April 2023
 
 by <a class="url fn" href="https://castogio.github.io/author/gioacchino-castorio.html">Gioacchino Castorio</a>
  
 
 
- 
-        </div>
-        
-        <div><p>I am writing this blog post mostly for my own future reference, and while it 
-will be nice and short, I hope it will save a few minutes to other
-troubleshooters on the web.</p>
-<p>I recently had to analyse the over-the-air traffic for a customer of mine, and
-they used used a Cisco AireOS Lightweight AP (LAP) for their monitor mode captures.
-Captures taken either on specialised sniffers or repurposed clients (e.g.
-MacBooks or Raspberry Pi boxes with Kali Linux) do not require any special 
-handling when opened with Wireshark and you would see the list of frames
-immediately.</p>
-<p>On the other hand, AireOS went down a different path and its captures require 
-specialised decoding. This is due to the fact that the wireless frames are
-encapsulated within packets from the LAP to the Wireless Lan Controller
-(WLC) from UDP port 5555. The following screenshot shows what you would be able
-to see when opening such kind of captures in Wireshark.</p>
-<p><center>
-    <img alt="AireOS capture in Wireshark" src="https://castogio.github.io/images/aireos_encoded_pcap/not_decoded_aireos.png">
-</center></p>
-<p>As for many things in radio communications, the packets in question can be 
-<strong>decoded</strong> using an appropriate interpretation method. Wireshark comes with a 
-built-in tool found in the topbar under <strong>Analyze &gt; Decode As...</strong> as showed in
-the screenshot below.</p>
-<p><center>
-    <img alt="AireOS capture in Wireshark" src="https://castogio.github.io/images/aireos_encoded_pcap/adding_new_decode_rule.png">
-</center></p>
-<p>Clickig in the + (plus) button, a new decode rule will be added to the list above.
-You will need to insert the following decoding parameters:
-- Field: UDP port
-- Value: 5555
-- Type: Integer, base 10
-- Default: SIGCOMP
-- Current: PEEKREMOTE</p>
-<p><center>
-    <img alt="AireOS capture in Wireshark" src="https://castogio.github.io/images/aireos_encoded_pcap/decode_rule.png">
-</center></p>
-<p>After making sure that the values inserted are correct, click the "OK" button
-and the list of frames in Wireshark will immediately change to reflect
-the actual content of the monitor mode capture as below.</p>
-<p><center>
-    <img alt="AireOS capture in Wireshark" src="https://castogio.github.io/images/aireos_encoded_pcap/decoded_aireos.png">
-</center></p>
-<h3>Referencesp</h3>
-<ul>
-<li>“Analyze and Troubleshoot 802.11 Wireless Sniffing.” 
-   Cisco Systems, Nov. 2022, https://bit.ly/43c7lAT. Accessed 28 May 2023.</li>
-</ul></div>
-        <hr />
-    </div>
-		
+ </div>
+        <div class="summary"><p>The multitude of Modulation and Coding Schemes (MCSs) 
+introduced in IEEE802.11 for the VHT and HE PHYs may look like magical 
+spells even for the seasoned wireless engineer. At the start of my journey 
+as a telecommunications engineer, I was particularly
+fascinated by the mathematics behind how to carry …</p> <a class="btn btn-info xsmall" href="https://castogio.github.io/demystifying-modulation-techniques-with-bpsk.html">read more</a></div>
+    </div>	
+				
 <div class="pagination">
 <ul>
-    <li class="prev disabled"><a href="#">&larr; Previous</a></li>
+    <li class="prev"><a href="https://castogio.github.io/author/gioacchino-castorio5.html">&larr; Previous</a></li>
 
-    <li class="active"><a href="https://castogio.github.io/category/80211.html">1</a></li>
-    <li class=""><a href="https://castogio.github.io/category/802112.html">2</a></li>
-    <li class=""><a href="https://castogio.github.io/category/802113.html">3</a></li>
-    <li class=""><a href="https://castogio.github.io/category/802114.html">4</a></li>
-    <li class=""><a href="https://castogio.github.io/category/802115.html">5</a></li>
+    <li class=""><a href="https://castogio.github.io/author/gioacchino-castorio.html">1</a></li>
+    <li class=""><a href="https://castogio.github.io/author/gioacchino-castorio2.html">2</a></li>
+    <li class=""><a href="https://castogio.github.io/author/gioacchino-castorio3.html">3</a></li>
+    <li class=""><a href="https://castogio.github.io/author/gioacchino-castorio4.html">4</a></li>
+    <li class=""><a href="https://castogio.github.io/author/gioacchino-castorio5.html">5</a></li>
+    <li class="active"><a href="https://castogio.github.io/author/gioacchino-castorio6.html">6</a></li>
 
-    <li class="next"><a href="https://castogio.github.io/category/802112.html">Next &rarr;</a></li>
+    <li class="next disabled"><a href="#">&rarr; Next</a></li>
 
 </ul>
 </div>
