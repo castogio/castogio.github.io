@@ -52,7 +52,7 @@ the actual content of the monitor mode capture as below.
     ![AireOS capture in Wireshark]({static}/images/aireos_encoded_pcap/decoded_aireos.png)
 </center>
 
-### Referencesp
+### References
 - “Analyze and Troubleshoot 802.11 Wireless Sniffing.” 
    Cisco Systems, Nov. 2022, https://bit.ly/43c7lAT. Accessed 28 May 2023.
 
