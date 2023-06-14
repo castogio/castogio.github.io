@@ -1,5 +1,125 @@
 <?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom"><title>Gioacchino's Radio Shack - 802.11</title><link href="https://castogio.github.io/" rel="alternate"></link><link href="https://castogio.github.io/feeds/80211.atom.xml" rel="self"></link><id>https://castogio.github.io/</id><updated>2023-05-28T12:00:00+01:00</updated><entry><title>Decoding AireOS monitor mode captures on Wireshark</title><link href="https://castogio.github.io/decoding-aireos-monitor-mode-captures-on-wireshark.html" rel="alternate"></link><published>2023-05-28T12:00:00+01:00</published><updated>2023-05-28T12:00:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-05-28:/decoding-aireos-monitor-mode-captures-on-wireshark.html</id><summary type="html">&lt;p&gt;I am writing this blog post mostly for my own future reference, and while it 
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Gioacchino's Radio Shack - 802.11</title><link href="https://castogio.github.io/" rel="alternate"></link><link href="https://castogio.github.io/feeds/80211.atom.xml" rel="self"></link><id>https://castogio.github.io/</id><updated>2023-06-14T18:00:00+01:00</updated><entry><title>R&amp;D sneak peek: Multi-AP Coordinated Spatial Reuse for Wi-Fi 8</title><link href="https://castogio.github.io/rd-sneak-peek-multi-ap-coordinated-spatial-reuse-for-wi-fi-8.html" rel="alternate"></link><published>2023-06-14T18:00:00+01:00</published><updated>2023-06-14T18:00:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-06-14:/rd-sneak-peek-multi-ap-coordinated-spatial-reuse-for-wi-fi-8.html</id><summary type="html">&lt;p&gt;In this post, I would like to describe an interesting take on Multi-AP 
+Coordination (MAPC) leveraging Spatial Reuse (SR). AP coordination has groups of
+APs communicate with each other to minimise collisions while transmitting at the
+same time and on the same frequency channel. I recently came across a scientific …&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this post, I would like to describe an interesting take on Multi-AP 
+Coordination (MAPC) leveraging Spatial Reuse (SR). AP coordination has groups of
+APs communicate with each other to minimise collisions while transmitting at the
+same time and on the same frequency channel. I recently came across a scientific
+article by David Nunez et al. in [1], which I believe is worth understanding as it
+proposes an algorithm to identify coordinated AP groups and schedule
+transmissions of their buffered frames at the same time.&lt;/p&gt;
+&lt;h2&gt;What is Spatial Reuse?&lt;/h2&gt;
+&lt;p&gt;Spatial Reuse is not a new concept in wireless communications. If a transmitter
+is “distant” enough from other transmitters on the same channel, it can consider
+them as background noise when communicating with its intended clients. Think
+about yourself speaking in English to an audience in a large garden. Other
+people can do the same 20 yards away from yours and each other’s groups if
+everyone agrees to be well-behaved. Communication is possible because sound is
+affected by Path Loss; the same can be applied to 802.11 wireless communication
+when considering a model such as the TGax model for Enterprise Scenarios [2]
+which takes into account the distance between the transmitter and receiver, the
+frequency used and the number of walls. The mathematical details are not
+interesting for understanding the concept, but you may appreciate how being in a
+harsh RF environment causing strong attenuation can reduce the reuse distance.
+The picture below shows a client station, called STA, being able to hear 
+AP&lt;sub&gt;4&lt;/sub&gt; and AP&lt;sub&gt;5&lt;/sub&gt; on the same channel used by AP&lt;sub&gt;2&lt;/sub&gt;
+to which it is connected.&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="Spatial Reuse cells and co-channel interference" src="https://castogio.github.io/images/mapc_sr/spatial_reuse_cells.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;AP4 and AP5 are interferers and contribute to the effect of background noise in
+the communications from AP&lt;sub&gt;2&lt;/sub&gt;, potentially preventing STA from
+receiving readable signals. The effect of background noise and interference over
+the useful signal is described by the following formula for the Signal to
+Interference plus Noise Ratio (SINR) as seen on the client STA for the
+transmission from AP&lt;sub&gt;2&lt;/sub&gt;:&lt;/p&gt;
+&lt;!-- SINR_{STA}^{2} = \frac{P_2}{N + \sum_{j \neq 2} P_{j}} --&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="SINR formula" src="https://castogio.github.io/images/mapc_sr/sinr_formula.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;where P&lt;sub&gt;2&lt;/sub&gt; and P&lt;sub&gt;j&lt;/sub&gt; are the received power from AP&lt;sub&gt;2&lt;/sub&gt;
+and the other &lt;em&gt;j&lt;/em&gt; APs as seen from STA respectively, and N is the noise power. 
+We cannot alter the &lt;em&gt;N&lt;/em&gt; value as it is due to external factors in the
+environment beyond our control (e.g. the APs of a neighbouring office),
+so we should keep the sum of the P&lt;sub&gt;j&lt;/sub&gt; as low as possible. 
+The obvious course of action is not to have APs with higher interference power
+transmit at the same time as AP&lt;sub&gt;2&lt;/sub&gt;.
+We face a new problem: how do we select the group of APs that can transmit at
+the same time as AP&lt;sub&gt;2&lt;/sub&gt;?&lt;/p&gt;
+&lt;h2&gt;Detecting Coordinated Groups for SR&lt;/h2&gt;
+&lt;p&gt;The paper defines a “&lt;em&gt;Sharing AP&lt;/em&gt;” as the coordinator for a group of
+“&lt;em&gt;Shared APs.&lt;/em&gt;” They also assume that all the APs are within the coverage area
+of the Sharing AP, which can access the medium and send a 
+Multi-AP Request-To-Send (MAP-RST) to reserve the channel. In case of no
+collisions on their side, the Shared APs reply with a MAP Clear-To-Send
+(MAP-CTS), guaranteeing that the clients in the service area will stay silent
+for the rest of the Transmit Opportunity Sharing (TXOP-sharing) transmission.
+Once the Sharing AP can access the channel, the shared TXOP is divided into one
+or more coordinated temporal slots. It also signals which APs should transmit
+during each slot with a MAP Trigger Frame (MAP-TF).
+Effectively the authors leverage &lt;em&gt;Time Division Multiple Access&lt;/em&gt; (TDMA)
+as they have the Sharing AP reserving the channel, and they enhance it with SR
+by selecting only transmitters that interfere the least.&lt;/p&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="TXOP-sharing period" src="https://castogio.github.io/images/mapc_sr/TXOP_sharing_breakdown.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;To create groups of APs that can transmit together, the authors define a Central
+Controller (CC) that knows all the received powers P&lt;sub&gt;j&lt;/sub&gt; as seen from
+the STA and can compute the SIND for each AP. They assume that the RF channel
+is always symmetric so that the power the client receives in transmissions from
+the AP (downlink) is the same as the AP receives from the client on the way back
+(uplink). In light of this, all the APs in the same coordinated group of size
+M must guarantee that their SINR for each of their connected client STAs is
+above an m threshold, so that:&lt;/p&gt;
+&lt;!-- \min_{j=1...M}SINR_{STA}^{j} \geqslant m --&gt;
+&lt;p&gt;&lt;center&gt;
+    &lt;img alt="SINR formula" src="https://castogio.github.io/images/mapc_sr/min_sinr_formula.png"&gt;
+&lt;/center&gt;&lt;/p&gt;
+&lt;p&gt;The APs within the same group of K units are identified using a 
+&lt;a href="https://en.wikipedia.org/wiki/Greedy_algorithm"&gt;“greedy” strategy&lt;/a&gt; called the 
+“&lt;em&gt;At-most-K&lt;/em&gt;” algorithm. An AP is selected as a reference, and on each iteration
+a new AP is added if the formula described above holds and the SINR is still
+high enough for all the client STAs connected to APs already in the group.&lt;/p&gt;
+&lt;h2&gt;Traffic Scheduling Algorithms&lt;/h2&gt;
+&lt;p&gt;The operation can be repeated using different reference APs so that multiple
+groups of “compatible” APs can be found. APs that are located in better
+positions (or trivially far enough) may end up belonging to multiple groups.
+Once the groups are identified, the CC must select what groups should transmit.
+The paper proposes four strategies based on the number of packets buffered in
+the APs of the group:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;em&gt;NumPkSingle&lt;/em&gt;: the CC selects the groups containing the AP with the highest 
+   number of buffered packets, and then picks the single group with the highest 
+   number of buffered packets across all the APs in the group.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;NumPkGroup&lt;/em&gt;: the CC selects the group with the highest number of packets.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;OldOkSingle&lt;/em&gt;: the CC selects the groups containing the AP with the oldest
+   buffered packet, and then picks the single group with the highest aggregate
+   group delay as a sum of the waiting times of the oldest buffered packets
+   across all the APs in the group.&lt;/li&gt;
+&lt;li&gt;&lt;em&gt;OldPkGroup&lt;/em&gt;: the CC selects the group with the highest aggregate group delay.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The algorithms prevent starvation between groups when using NumPkGroup and 
+OldPkGroup by dividing the aggregated value by the number of APs in the groups;
+this is particularly important whenever there are groups with just a few APs and
+others with a large number of units. The simulation results presented in the
+paper show that NumPkSingle and OldOkSingle (&lt;em&gt;per-AP selection&lt;/em&gt;) outperform the
+other strategies (&lt;em&gt;per-Group selection&lt;/em&gt;) when the TXOP-sharing transmissions are
+scheduled every 5 milliseconds and the SINR threshold is 20 dB, high enough to
+guarantee the use of a high Modulation and Coding Scheme (MCS) in the simulation
+using 9 APs transmitting on the same channel.&lt;/p&gt;
+&lt;h2&gt;Wrapping up&lt;/h2&gt;
+&lt;p&gt;MAPC is still a hot topic for research, and commercially-available APs will
+probably use some still-unknown solution. I hope this blog post picked the
+readers’ interest in what is coming in the future iterations of IEEE 802.11,
+probably in 8/10 years.&lt;/p&gt;
+&lt;h2&gt;References&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;Nunez, David, Malcom Smith, and Boris Bellalta. 
+"&lt;em&gt;Multi-AP Coordinated Spatial Reuse for Wi-Fi 8: Group Creation and Scheduling.&lt;/em&gt;"
+arXiv preprint arXiv:2305.04846 (2023).&lt;/li&gt;
+&lt;li&gt;Merlin, Simone, et al. "&lt;em&gt;TGax simulation scenarios.&lt;/em&gt;" IEEE802 (2015): 11-14.&lt;/li&gt;
+&lt;/ol&gt;</content><category term="802.11"></category></entry><entry><title>Decoding AireOS monitor mode captures on Wireshark</title><link href="https://castogio.github.io/decoding-aireos-monitor-mode-captures-on-wireshark.html" rel="alternate"></link><published>2023-05-28T12:00:00+01:00</published><updated>2023-05-28T12:00:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-05-28:/decoding-aireos-monitor-mode-captures-on-wireshark.html</id><summary type="html">&lt;p&gt;I am writing this blog post mostly for my own future reference, and while it 
 will be nice and short, I hope it will save a few minutes to other
 troubleshooters on the web.&lt;/p&gt;
 &lt;p&gt;I recently had to analyse the over-the-air traffic for a customer of mine, and
@@ -43,18 +163,18 @@ the actual content of the monitor mode capture as below.&lt;/p&gt;
 &lt;p&gt;&lt;center&gt;
     &lt;img alt="AireOS capture in Wireshark" src="https://castogio.github.io/images/aireos_encoded_pcap/decoded_aireos.png"&gt;
 &lt;/center&gt;&lt;/p&gt;
-&lt;h3&gt;Referencesp&lt;/h3&gt;
+&lt;h3&gt;References&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;“Analyze and Troubleshoot 802.11 Wireless Sniffing.” 
    Cisco Systems, Nov. 2022, https://bit.ly/43c7lAT. Accessed 28 May 2023.&lt;/li&gt;
 &lt;/ul&gt;</content><category term="802.11"></category></entry><entry><title>Channel Switch Announcements explained</title><link href="https://castogio.github.io/channel-switch-announcements-explained.html" rel="alternate"></link><published>2023-05-08T00:01:00+01:00</published><updated>2023-05-08T00:01:00+01:00</updated><author><name>Gioacchino Castorio</name></author><id>tag:castogio.github.io,2023-05-08:/channel-switch-announcements-explained.html</id><summary type="html">&lt;p&gt;In this article, I would like to describe what I believe is an interesting 
 mechanic of dot11 wireless networks called &lt;em&gt;Channel Switch Announcement&lt;/em&gt; (CSA). 
-This is often overlooked as it usually works pretty much flawlessly, but it is
-pretty much ubiquitous in today's deployments because admins
-use automatic Resource Radio …&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this article, I would like to describe what I believe is an interesting 
+This is often overlooked as it usually works flawlessly, but it is
+almost ubiquitous in today's deployments because admins
+use automatic Resource Radio Management (RRM), which …&lt;/p&gt;</summary><content type="html">&lt;p&gt;In this article, I would like to describe what I believe is an interesting 
 mechanic of dot11 wireless networks called &lt;em&gt;Channel Switch Announcement&lt;/em&gt; (CSA). 
-This is often overlooked as it usually works pretty much flawlessly, but it is
-pretty much ubiquitous in today's deployments because admins
+This is often overlooked as it usually works flawlessly, but it is
+almost ubiquitous in today's deployments because admins
 use automatic Resource Radio Management (RRM), which may prompt for 
 (frequent) channel changes on the Access Points as they adapt to the surrounding
 RF environment. CSAs are also used whenever a Dynamic Frequency Selection (DFS)
@@ -489,7 +609,7 @@ representing 1's as &lt;em&gt;s(t)&lt;/em&gt; and 0's as &lt;em&gt;-s(t)&lt;/em&
 &lt;!-- s(t) = A*cos(2*pi*f*t) --&gt;
 &lt;!-- https://latex.codecogs.com/eqneditor/editor.php --&gt;
 &lt;p&gt;&lt;center&gt;
-    &lt;img alt="Simple cosine signal" src="https://castogio.github.io/images/cosine_base_signal.png"&gt;
+    &lt;img alt="Simple cosine signal" src="https://castogio.github.io/images/modulation_tech/cosine_base_signal.png"&gt;
 &lt;/center&gt;&lt;/p&gt;
 &lt;p&gt;The receiver station would immediately recognise what value we are transmitting 
 by comparing what is received with the reference signal,
@@ -499,7 +619,7 @@ be seen at the receiving station, considering path loss exclusively and ignoring
 additional effects such as multipath; the picture shows a one being received,
 followed by a zero.&lt;/p&gt;
 &lt;p&gt;&lt;center&gt;
-    &lt;img alt="periodic" src="https://castogio.github.io/images/bpsk_periodic_zero_received_vs_reference.png"&gt;
+    &lt;img alt="periodic" src="https://castogio.github.io/images/modulation_tech/bpsk_periodic_zero_received_vs_reference.png"&gt;
 &lt;/center&gt;&lt;/p&gt;
 &lt;p&gt;The carrier signal s(t) is not enough to transmit any meaningful
 information in real life: the time variable t is an infinite
@@ -516,12 +636,12 @@ p(t) =\begin{cases}
 --&gt;
 &lt;!-- https://latex.codecogs.com/eqneditor/editor.php --&gt;
 &lt;p&gt;&lt;center&gt;
-    &lt;img alt="rectangular function" src="https://castogio.github.io/images/rect_function.png"&gt;
+    &lt;img alt="rectangular function" src="https://castogio.github.io/images/modulation_tech/rect_function.png"&gt;
 &lt;/center&gt;&lt;/p&gt;
 &lt;p&gt;Multiplying the two functions &lt;em&gt;g(t) = s(t)p(t)&lt;/em&gt;, we get a limited section of the
 original signal, namely a cycle of the cosine wave.&lt;/p&gt;
 &lt;p&gt;&lt;center&gt;
-    &lt;img alt="Windowed cosine" src="https://castogio.github.io/images/windowed_signal.png"&gt;
+    &lt;img alt="Windowed cosine" src="https://castogio.github.io/images/modulation_tech/windowed_signal.png"&gt;
 &lt;/center&gt;&lt;/p&gt;
 &lt;p&gt;This signal p(t) is extremely powerful because it lets us move its "windowing" 
 effect by simply shifting its "up" value by the period T to the left or right
@@ -536,7 +656,7 @@ summation &lt;em&gt;S(t)&lt;/em&gt;, where N is the number of windows and the co
 S(t) = \sum_{k=0}^{N-1} c_k*g(t-kT) = \sum_{k=0}^{N-1} c_k*s(t-kT)*p(t-kT)
 --&gt;
 &lt;p&gt;&lt;center&gt;
-    &lt;img alt="pulse train formula" src="https://castogio.github.io/images/pulse_train_formula.png"&gt;
+    &lt;img alt="pulse train formula" src="https://castogio.github.io/images/modulation_tech/pulse_train_formula.png"&gt;
 &lt;/center&gt;&lt;/p&gt;
 &lt;p&gt;The following image shows an example of the application of the above formula
 when transmitting a zero followed by a one; the receiver can compare its
@@ -544,7 +664,7 @@ local reference to the received signal. Note that this example
 considers the existence of some attenuation at RX due to Free Space Path Loss
 while ignoring other detrimental effects such as multi-path.&lt;/p&gt;
 &lt;p&gt;&lt;center&gt;
-    &lt;img alt="pulse train plot" src="https://castogio.github.io/images/bpsk_received_vs_reference.png"&gt;
+    &lt;img alt="pulse train plot" src="https://castogio.github.io/images/modulation_tech/bpsk_received_vs_reference.png"&gt;
 &lt;/center&gt;&lt;/p&gt;
 &lt;p&gt;You might have noticed that some level of time synchronisation is
 needed between the reference and the received signal to allow effective
@@ -554,12 +674,12 @@ IEEE802.11 PHY Protocol Data Units (PPDUs).&lt;/p&gt;
 &lt;p&gt;In conclusion, we managed to transmit a sequence of single bits leveraging the 
 simple fact that our RX can discriminate between a positive 
 or a negative coefficient for the signal. 
-We defined a signal constellation containing two pints which are shifted
+We defined a signal constellation containing two points which are shifted
 180 degrees between each other: this technique is commonly referred to as
 Binary Phase Shift Keying (BPSK) because the same base carrier &lt;em&gt;s(t)&lt;/em&gt; can 
 assume two different phase configurations to represent a single bit.&lt;/p&gt;
 &lt;p&gt;&lt;center&gt;
-    &lt;img alt="pulse train plot" src="https://castogio.github.io/images/bpsk_constellation.png"&gt;
+    &lt;img alt="pulse train plot" src="https://castogio.github.io/images/modulation_tech/bpsk_constellation.png"&gt;
 &lt;/center&gt;&lt;/p&gt;
 &lt;p&gt;Intuitively, we can expand the number of transmitted bits by following the same
 principles of "tweak a parameter and compare to a reference" as described above.
