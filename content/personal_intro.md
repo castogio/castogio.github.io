@@ -2,9 +2,9 @@ Title: About Me
 Date: 2023-05-01 22:11
 Category: About Me
 
-My name is Gioacchino Castorio. but people call me Jack or Kino.
-By day I troubleshoot dot11 wireless network, by night I like to call myself
-MI0YTF as an amateur radio operator.
+My name is Gioacchino Castorio, but people call me Jack or Kino.
+I am a professional wireless network troubleshooter and a certified amateur 
+radio operator in the UK; my callsign is MI0YTF.
 
 
 ![my picture]({static}/images/personal_intro/profile_pic.png)
@@ -12,9 +12,9 @@ MI0YTF as an amateur radio operator.
 I spend most of my time working out, going for walks, reading technical books, 
 or writing my own video games and utility programs in Python.
 
-I created this blog to share tips and tricks when troubleshooting, avoiding some
-common pitfalls, while heavily relying on network programmability and automation 
-which have greatly simplified my day-to-day.
+I created this blog to share tips and tricks when troubleshooting, keeping track
+of what I learnt, exploring research topics and experimenting with
+network programmability.
 
 
 ## Contacts
