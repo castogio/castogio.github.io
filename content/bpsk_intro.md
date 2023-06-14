@@ -18,7 +18,7 @@ representing 1's as _s(t)_ and 0's as _-s(t)_.
 <!-- s(t) = A*cos(2*pi*f*t) -->
 <!-- https://latex.codecogs.com/eqneditor/editor.php -->
 <center>
-    ![Simple cosine signal]({static}/images/cosine_base_signal.png)
+    ![Simple cosine signal]({static}/images/modulation_tech/cosine_base_signal.png)
 </center>
 
 The receiver station would immediately recognise what value we are transmitting 
@@ -50,7 +50,7 @@ p(t) =\begin{cases}
 -->
 <!-- https://latex.codecogs.com/eqneditor/editor.php -->
 <center>
-    ![rectangular function]({static}/images/rect_function.png)
+    ![rectangular function]({static}/images/modulation_tech/rect_function.png)
 </center>
 
 Multiplying the two functions _g(t) = s(t)p(t)_, we get a limited section of the
@@ -75,7 +75,7 @@ _c_ is 1 when transmitting a "one" bit, -1 otherwise.
 S(t) = \sum_{k=0}^{N-1} c_k*g(t-kT) = \sum_{k=0}^{N-1} c_k*s(t-kT)*p(t-kT)
 --> 
 <center>
-    ![pulse train formula]({static}/images/pulse_train_formula.png)
+    ![pulse train formula]({static}/images/modulation_tech/pulse_train_formula.png)
 </center>
 
 The following image shows an example of the application of the above formula
@@ -85,7 +85,7 @@ considers the existence of some attenuation at RX due to Free Space Path Loss
 while ignoring other detrimental effects such as multi-path.
 
 <center>
-    ![pulse train plot]({static}/images/bpsk_received_vs_reference.png)
+    ![pulse train plot]({static}/images/modulation_tech/bpsk_received_vs_reference.png)
 </center>
 
 You might have noticed that some level of time synchronisation is
@@ -97,13 +97,13 @@ IEEE802.11 PHY Protocol Data Units (PPDUs).
 In conclusion, we managed to transmit a sequence of single bits leveraging the 
 simple fact that our RX can discriminate between a positive 
 or a negative coefficient for the signal. 
-We defined a signal constellation containing two pints which are shifted
+We defined a signal constellation containing two points which are shifted
 180 degrees between each other: this technique is commonly referred to as
 Binary Phase Shift Keying (BPSK) because the same base carrier _s(t)_ can 
 assume two different phase configurations to represent a single bit.
 
 <center>
-    ![pulse train plot]({static}/images/bpsk_constellation.png)
+    ![pulse train plot]({static}/images/modulation_tech/bpsk_constellation.png)
 </center>
 
 Intuitively, we can expand the number of transmitted bits by following the same
