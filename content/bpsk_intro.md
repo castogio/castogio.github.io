@@ -30,7 +30,7 @@ additional effects such as multipath; the picture shows a one being received,
 followed by a zero.
 
 <center>
-    ![periodic]({static}/images/bpsk_periodic_zero_received_vs_reference.png)
+    ![periodic]({static}/images/modulation_tech/bpsk_periodic_zero_received_vs_reference.png)
 </center>
 
 The carrier signal s(t) is not enough to transmit any meaningful
@@ -57,7 +57,7 @@ Multiplying the two functions _g(t) = s(t)p(t)_, we get a limited section of the
 original signal, namely a cycle of the cosine wave.
 
 <center>
-    ![Windowed cosine]({static}/images/windowed_signal.png)
+    ![Windowed cosine]({static}/images/modulation_tech/windowed_signal.png)
 </center>
 
 This signal p(t) is extremely powerful because it lets us move its "windowing" 
