@@ -4,8 +4,8 @@ Category: 802.11
 
 In this article, I would like to describe what I believe is an interesting 
 mechanic of dot11 wireless networks called _Channel Switch Announcement_ (CSA). 
-This is often overlooked as it usually works pretty much flawlessly, but it is
-pretty much ubiquitous in today's deployments because admins
+This is often overlooked as it usually works flawlessly, but it is
+almost ubiquitous in today's deployments because admins
 use automatic Resource Radio Management (RRM), which may prompt for 
 (frequent) channel changes on the Access Points as they adapt to the surrounding
 RF environment. CSAs are also used whenever a Dynamic Frequency Selection (DFS)
