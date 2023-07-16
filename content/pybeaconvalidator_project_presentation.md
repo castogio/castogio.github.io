@@ -1,5 +1,5 @@
 Title: PyBeaconValidator: a project idea
-Date: 2023-07-26 12:00
+Date: 2023-07-16 12:00
 Category: 802.11
 
 I have recently completed a one-week course on advanced Python programming, and
