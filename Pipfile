@@ -4,10 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pelican = {extras = ["markdown"], version = "*"}
 numpy = "*"
 matplotlib = "*"
 ghp-import = "*"
+pelican = {version = "*", extras = ["markdown"]}
+rich = "*"
 
 [dev-packages]
 
