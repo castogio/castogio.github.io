@@ -1,0 +1,21 @@
+@startuml PyBeaconValidator
+actor User as u #red
+participant PyBeaconValidator as pr 
+participant "Cisco Meraki Cloud" as mc #LightGreen
+database "FileSystem" as fs
+
+u->pr: network_id, pcap_path
+pr->mc: get_all_aps(network_id)
+pr<--mc: list[access_point]
+loop for each access_point
+    pr->mc: get_all_bssids(access_point)
+    pr<--mc: list[bssid]
+end
+pr->mc: get_all_ssid_config(network_id)
+pr<--mc: list[ssid_config]
+pr->fs: read_file(pcap_path)
+pr<--fs: pcap_file
+pr->pr: parse pcap_file
+pr->pr: compare(expected, actual)
+u<--pr: show mismatches
+@enduml
