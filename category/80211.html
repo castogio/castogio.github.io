@@ -59,8 +59,8 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="https://castogio.github.io/rd-sneak-peek-multi-ap-coordinated-spatial-reuse-for-wi-fi-8.html"><h1>R&D sneak peek: Multi-AP Coordinated Spatial Reuse for Wi-Fi 8</h1></a>
-Wed 14 June 2023
+            <a href="https://castogio.github.io/pybeaconvalidator-a-project-idea.html"><h1>PyBeaconValidator: a project idea</h1></a>
+Wed 26 July 2023
 
 by <a class="url fn" href="https://castogio.github.io/author/gioacchino-castorio.html">Gioacchino Castorio</a>
  
@@ -69,124 +69,200 @@ by <a class="url fn" href="https://castogio.github.io/author/gioacchino-castorio
  
         </div>
         
-        <div><p>In this post, I would like to describe an interesting take on Multi-AP 
-Coordination (MAPC) leveraging Spatial Reuse (SR). AP coordination has groups of
-APs communicate with each other to minimise collisions while transmitting at the
-same time and on the same frequency channel. I recently came across a scientific
-article by David Nunez et al. in [1], which I believe is worth understanding as it
-proposes an algorithm to identify coordinated AP groups and schedule
-transmissions of their buffered frames at the same time.</p>
-<h2>What is Spatial Reuse?</h2>
-<p>Spatial Reuse is not a new concept in wireless communications. If a transmitter
-is “distant” enough from other transmitters on the same channel, it can consider
-them as background noise when communicating with its intended clients. Think
-about yourself speaking in English to an audience in a large garden. Other
-people can do the same 20 yards away from yours and each other’s groups if
-everyone agrees to be well-behaved. Communication is possible because sound is
-affected by Path Loss; the same can be applied to 802.11 wireless communication
-when considering a model such as the TGax model for Enterprise Scenarios [2]
-which takes into account the distance between the transmitter and receiver, the
-frequency used and the number of walls. The mathematical details are not
-interesting for understanding the concept, but you may appreciate how being in a
-harsh RF environment causing strong attenuation can reduce the reuse distance.
-The picture below shows a client station, called STA, being able to hear 
-AP<sub>4</sub> and AP<sub>5</sub> on the same channel used by AP<sub>2</sub>
-to which it is connected.</p>
-<p><center>
-    <img alt="Spatial Reuse cells and co-channel interference" src="https://castogio.github.io/images/mapc_sr/spatial_reuse_cells.png">
-</center></p>
-<p>AP4 and AP5 are interferers and contribute to the effect of background noise in
-the communications from AP<sub>2</sub>, potentially preventing STA from
-receiving readable signals. The effect of background noise and interference over
-the useful signal is described by the following formula for the Signal to
-Interference plus Noise Ratio (SINR) as seen on the client STA for the
-transmission from AP<sub>2</sub>:</p>
-<!-- SINR_{STA}^{2} = \frac{P_2}{N + \sum_{j \neq 2} P_{j}} -->
-<p><center>
-    <img alt="SINR formula" src="https://castogio.github.io/images/mapc_sr/sinr_formula.png">
-</center></p>
-<p>where P<sub>2</sub> and P<sub>j</sub> are the received power from AP<sub>2</sub>
-and the other <em>j</em> APs as seen from STA respectively, and N is the noise power. 
-We cannot alter the <em>N</em> value as it is due to external factors in the
-environment beyond our control (e.g. the APs of a neighbouring office),
-so we should keep the sum of the P<sub>j</sub> as low as possible. 
-The obvious course of action is not to have APs with higher interference power
-transmit at the same time as AP<sub>2</sub>.
-We face a new problem: how do we select the group of APs that can transmit at
-the same time as AP<sub>2</sub>?</p>
-<h2>Detecting Coordinated Groups for SR</h2>
-<p>The paper defines a “<em>Sharing AP</em>” as the coordinator for a group of
-“<em>Shared APs.</em>” They also assume that all the APs are within the coverage area
-of the Sharing AP, which can access the medium and send a 
-Multi-AP Request-To-Send (MAP-RST) to reserve the channel. In case of no
-collisions on their side, the Shared APs reply with a MAP Clear-To-Send
-(MAP-CTS), guaranteeing that the clients in the service area will stay silent
-for the rest of the Transmit Opportunity Sharing (TXOP-sharing) transmission.
-Once the Sharing AP can access the channel, the shared TXOP is divided into one
-or more coordinated temporal slots. It also signals which APs should transmit
-during each slot with a MAP Trigger Frame (MAP-TF).
-Effectively the authors leverage <em>Time Division Multiple Access</em> (TDMA)
-as they have the Sharing AP reserving the channel, and they enhance it with SR
-by selecting only transmitters that interfere the least.</p>
-<p><center>
-    <img alt="TXOP-sharing period" src="https://castogio.github.io/images/mapc_sr/TXOP_sharing_breakdown.png">
-</center></p>
-<p>To create groups of APs that can transmit together, the authors define a Central
-Controller (CC) that knows all the received powers P<sub>j</sub> as seen from
-the STA and can compute the SIND for each AP. They assume that the RF channel
-is always symmetric so that the power the client receives in transmissions from
-the AP (downlink) is the same as the AP receives from the client on the way back
-(uplink). In light of this, all the APs in the same coordinated group of size
-M must guarantee that their SINR for each of their connected client STAs is
-above an m threshold, so that:</p>
-<!-- \min_{j=1...M}SINR_{STA}^{j} \geqslant m -->
-<p><center>
-    <img alt="SINR formula" src="https://castogio.github.io/images/mapc_sr/min_sinr_formula.png">
-</center></p>
-<p>The APs within the same group of K units are identified using a 
-<a href="https://en.wikipedia.org/wiki/Greedy_algorithm">“greedy” strategy</a> called the 
-“<em>At-most-K</em>” algorithm. An AP is selected as a reference, and on each iteration
-a new AP is added if the formula described above holds and the SINR is still
-high enough for all the client STAs connected to APs already in the group.</p>
-<h2>Traffic Scheduling Algorithms</h2>
-<p>The operation can be repeated using different reference APs so that multiple
-groups of “compatible” APs can be found. APs that are located in better
-positions (or trivially far enough) may end up belonging to multiple groups.
-Once the groups are identified, the CC must select what groups should transmit.
-The paper proposes four strategies based on the number of packets buffered in
-the APs of the group:</p>
+        <div><p>I have recently completed a one-week course on advanced Python programming, and
+wanted to make something useful with the newly acquired knowledge to simplify
+the management of my wireless laboratory.</p>
+<p>I created the first iteration of <strong>PyBeaconValidator</strong>, a CLI program that can 
+parse monitor mode packet captures, select the Beacon management frames, extract
+the content of their Information Elements, and match them with the
+configuration specified on the Cisco Meraki Dashboard. The program allows to 
+validate if the AP is operating as per its configuration without opening the
+Dashboard webpage. This is very helpful in my laboratory when conducting 
+experiments as the APs may not fetch new configurations due to the lack of
+Internet reachability or otherwise operate incorrectly due to a defect. As a 
+side-effect, the program could also confirm if the Beacons are being spoofed.</p>
+<p>The readers can find the GitHub repository at
+<a href="https://github.com/castogio/pybeaconvalidator">this link</a>. The project is 
+at a very early stage, but it already has all the components that will be used
+for the "usable" version. The program is released as a <em>Free/Libre Software</em> 
+with a <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU GPLv3 software license</a>.</p>
+<h2>Forewords</h2>
+<p>PyBeaconValidator heavily relies on the Cisco Meraki API for accessing the
+configuration of the APs on the Dashboard. Having access to a working Dashboard,
+administrators can enable the API access under <strong>Organization &gt; Settings &gt; Dashboard API access</strong> 
+by selecting the tickbox. After enabling the API, an API
+key (i.e. an access token) can be created under <strong>My Profile</strong>. More information
+can be found at <a href="https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API">this link</a>.</p>
+<p>The user needs to have the following dependencies installed from PyPI:
+- The <a href="https://github.com/meraki/dashboard-api-python">dashboard-api-python by Cisco Meraki</a>, 
+  which provides all the current Dashboard API endpoints.
+- <a href="https://gitlab.com/mike01/pypacker">pypacker</a> a very slim low-level packet
+  manipulation library for Python.</p>
+<p>The program requires the use of Python 3.11 (or superior) to work correctly, and
+I encourage using a virtual environment, such as <strong>pipenv</strong> (used for the project)
+or <strong>poetry</strong> for better handling of the dependencies. Using pipenv the install 
+procedure looks like the following:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>&lt;PATH-TO-PROJECT&gt;/pybeaconvalidator
+pipenv<span class="w"> </span>--python<span class="w"> </span><span class="s1">&#39;3.11&#39;</span><span class="w"> </span><span class="c1"># create pipenv environement</span>
+pipenv<span class="w"> </span>install<span class="w"> </span>meraki
+sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>python3.11-dev
+pipenv<span class="w"> </span>install<span class="w"> </span>pypacker<span class="w"> </span>netifaces
+pipenv<span class="w"> </span>shell<span class="w"> </span><span class="c1"># enable pipenv environment</span>
+</code></pre></div>
+
+<p>I am developing the tool on a Trisquel GNU/Linux-libre machine (x86_64).
+I intend to test the tool on Apple macOS down the line and, potentially, adapt
+it to Microsoft Windows.</p>
+<h2>High-level Program Workflow</h2>
+<p>The idea behind the project is fairly simple, so I wanted the user workflow
+to be simple as well.</p>
+<p>The user needs to know their API key as described previously and it should
+specified in the program shell environment as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">MERAKI_DASHBOARD_API_KEY</span><span class="o">=</span>&lt;your-api-key&gt;
+</code></pre></div>
+
+<p>PyBeaconValidator also assumes the user captured a monitor mode packet capture to be
+analysed in <em>.pcap</em> format, for instance, taken on a MacBook using the wireless
+sniffer tool. I decided not to integrate the capture function into the program as 
+it would increase the complexity and often the wireless network card of the
+host machine would not be able to take monitor mode pcaps anyway.</p>
+<p>Once the above is cleared, PyBeaconValidator executes the following steps:</p>
 <ol>
-<li><em>NumPkSingle</em>: the CC selects the groups containing the AP with the highest 
-   number of buffered packets, and then picks the single group with the highest 
-   number of buffered packets across all the APs in the group.</li>
-<li><em>NumPkGroup</em>: the CC selects the group with the highest number of packets.</li>
-<li><em>OldOkSingle</em>: the CC selects the groups containing the AP with the oldest
-   buffered packet, and then picks the single group with the highest aggregate
-   group delay as a sum of the waiting times of the oldest buffered packets
-   across all the APs in the group.</li>
-<li><em>OldPkGroup</em>: the CC selects the group with the highest aggregate group delay.</li>
+<li>The program reads the Cisco Meraki Network ID from the program arguments; the same
+   is done to the path to the capture file.</li>
+<li>The program retrieves the details of the APs in the wireless network, such as the name,
+   serial number, model, MAC address, and tags.</li>
+<li>The program retrieves the BSSID data for each AP. The information will be matched with
+   the Transmitter Address (TA) of the Beacons so that the program can identify
+   which unit is broadcasting the frame.</li>
+<li>The program retrieves the configuration for all the SSIDs in the network. The Cisco
+   Meraki Dashboard allows configuring up to 15 SSIDs at the time of this post.</li>
+<li>The program parses the packet capture, filtering the Beacon management frames only and
+   extracting their information, such as the TA, the channel (from the RadioTap 
+   header), the SSID name, and the Supported Rates Information Element (IE).
+   The extracted IEs are ones I need at the moment, but more might be added in the
+   future, feel free to contribute on GitHub.</li>
+<li>The program creates a list of pairs for each network configuration containing
+   the <em>expected</em> value as configured on Dashboard and the <em>actual</em> value
+   advertised in the beacon frames in the packet capture.</li>
+<li>If there is a mismatch between the expected and the actual value,
+   the program alerts the user with a warning on the screen.</li>
 </ol>
-<p>The algorithms prevent starvation between groups when using NumPkGroup and 
-OldPkGroup by dividing the aggregated value by the number of APs in the groups;
-this is particularly important whenever there are groups with just a few APs and
-others with a large number of units. The simulation results presented in the
-paper show that NumPkSingle and OldOkSingle (<em>per-AP selection</em>) outperform the
-other strategies (<em>per-Group selection</em>) when the TXOP-sharing transmissions are
-scheduled every 5 milliseconds and the SINR threshold is 20 dB, high enough to
-guarantee the use of a high Modulation and Coding Scheme (MCS) in the simulation
-using 9 APs transmitting on the same channel.</p>
-<h2>Wrapping up</h2>
-<p>MAPC is still a hot topic for research, and commercially-available APs will
-probably use some still-unknown solution. I hope this blog post picked the
-readers’ interest in what is coming in the future iterations of IEEE 802.11,
-probably in 8/10 years.</p>
+<p>The sequence diagram below shows the high-level workflow described previously:</p>
+<!-- 
+@startuml PyBeaconValidator
+actor User as u #red
+participant PyBeaconValidator as pr 
+participant "Cisco Meraki Cloud" as mc #LightGreen
+database "FileSystem" as fs
+
+u->pr: network_id, pcap_path
+pr->mc: get_all_aps(network_id)
+pr<--mc: list[access_point]
+loop for each access_point
+    pr->mc: get_all_bssids(access_point)
+    pr<--mc: list[bssid]
+end
+pr->mc: get_all_ssid_config(network_id)
+pr<--mc: list[ssid_config]
+pr->fs: read_file(pcap_path)
+pr<--fs: pcap_file
+pr->pr: parse pcap_file
+pr->pr: compare(expected, actual)
+u<--pr: show mismatches
+@enduml
+-->
+
+<p><img alt="PyBeaconValidator sequence diagram" src="https://castogio.github.io/images/pybeaconvalidator_presentation/pybeaconvalidator_seq_diagram.png"></p>
+<h2>Exemple of execution</h2>
+<p>The User Interface of PyBeaconValidator in this first iteration is still fairly
+minimal; however, it allows to execute test runs for debugging quite easily
+with minimal user interaction as the commands can be issued automatically by
+programming editors such as VSCodium or Vim. You can run the program from
+the shell as follows:</p>
+<p><img alt="PyBeaconValidator command" src="https://castogio.github.io/images/pybeaconvalidator_presentation/running_program.png"></p>
+<p>At the moment, the output is silent if there is no mismatch. I created an
+"artificial" mismatch by blocking the traffic from the APs to the Cisco Meraki
+Cloud using a firewall and then changing the <em>minimum</em> (basic) bitrate configuration.
+As shown in the screenshot below, the program shows a <em>WARNING</em> log for the
+mismatch containing the timestamp (ts) of the beacon in the file, the Serial
+Number (sn) of the AP in question, the BSSID and the expected vs. actual (seen)
+values for the bitrate:</p>
+<p><img alt="Minimum bitrate mismatch warning" src="https://castogio.github.io/images/pybeaconvalidator_presentation/output.png"></p>
+<h2>Frame processing insights</h2>
+<p>I selected <em>pypacker</em> as the capture parser among other alternatives as it seems 
+to be the fastest library available at the moment. I gave a go to
+<a href="https://github.com/KimiNewt/pyshark">pyshark</a>, which is a Python wrapper for
+<a href="https://man.archlinux.org/man/tshark.1">tshark</a>, but it was unbearably slow
+even for small captures.</p>
+<p>The following code snippet shows how the beacons are extracted from the capture 
+file in the program when using Pypacker:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">pypacker</span> <span class="kn">import</span> <span class="n">ppcap</span>
+<span class="kn">from</span> <span class="nn">pypacker.layer12</span> <span class="kn">import</span> <span class="n">radiotap</span><span class="p">,</span> <span class="n">ieee80211</span>
+
+<span class="o">...</span>
+
+<span class="n">beacons</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+<span class="k">with</span> <span class="n">ppcap</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span><span class="n">capture_file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">capture_reader</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">ts_ns</span><span class="p">,</span> <span class="n">buf</span> <span class="ow">in</span> <span class="n">capture_reader</span><span class="p">:</span>
+
+        <span class="c1"># all the frames in the .pcap file are incapsulated into Radiotab</span>
+        <span class="n">frame</span> <span class="o">=</span> <span class="n">radiotap</span><span class="o">.</span><span class="n">Radiotap</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+
+        <span class="c1"># decapsulate the Radiotap, IEEE802.11 header and the Beacon payload</span>
+        <span class="n">radiotap_header</span><span class="p">,</span> <span class="n">dot11_header</span><span class="p">,</span> <span class="n">beacon_payload</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> 
+                                                              <span class="n">ieee80211</span><span class="o">.</span><span class="n">IEEE80211</span><span class="p">,</span> 
+                                                              <span class="n">ieee80211</span><span class="o">.</span><span class="n">IEEE80211</span><span class="o">.</span><span class="n">Beacon</span><span class="p">]</span>
+
+        <span class="c1"># the frame is not a Beacon, the payload is None</span>
+        <span class="k">if</span> <span class="n">beacon_payload</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">continue</span> <span class="c1"># skip frame and go to the next one</span>
+
+        <span class="c1"># extract all required the fields from the Beacon frame</span>
+        <span class="n">beacon_frame</span> <span class="o">=</span> <span class="n">_process_pypacker_frame_headers</span><span class="p">(</span><span class="n">radiotap_header</span><span class="p">,</span>
+                                                       <span class="n">dot11_header</span><span class="p">,</span> 
+                                                       <span class="n">beacon_header</span><span class="p">,</span> <span class="n">ts_ns</span><span class="p">)</span>
+        <span class="n">beacons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">beacon_frame</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Despite the conceptual simplicity of Pypacker's programming interface, it
+offloads much of the responsibility of parsing of the raw byte content of the IEs
+to the programmer. This behaviour gives more freedom to the programmer, but
+it increases the difficulty in analysing the most common IE, such as the
+Supported Rates. As you can see in the snippet below the computation required on
+the byte octets in the IE (each one refers to a supported rate):</p>
+<div class="highlight"><pre><span></span><code><span class="n">supported_rates_ie</span> <span class="o">=</span> <span class="n">beacon_header</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">supported_rates_ie</span><span class="o">.</span><span class="n">body_bytes</span><span class="p">:</span>
+
+    <span class="c1"># check if the bitrate value refers to a BASIC bitrate by checking the</span>
+    <span class="c1"># first bit of the octect e.g. 1000 0000 --&gt; Basic Bitrate</span>
+    <span class="n">is_mandatory</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">b</span> <span class="o">&gt;&gt;</span> <span class="mi">7</span><span class="p">)</span>
+
+    <span class="c1"># compute bitrate in Mbps by multiplying octect</span>
+    <span class="c1"># remove if 1st bit in case of mandatory bitrate</span>
+    <span class="c1"># bitrate = (octect * 500 kbps) // 1000</span>
+    <span class="n">bitrate</span> <span class="o">=</span> <span class="p">((</span><span class="n">b</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">))</span> <span class="k">if</span> <span class="n">is_mandatory</span> <span class="k">else</span> <span class="n">b</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
+</code></pre></div>
+
+<h2>Frame processing insights</h2>
+<p>This project is still at a very early stage and I intend to go ahead adding
+more and more features over time. I consider it a great opportunity to get
+hands-on experience with frame processing and learn more about network
+automation in Python. PyBeaconValidator is freely available on GitHub so the
+readers can download the source code, study it, modify and redistribute their
+copies.</p>
 <h2>References</h2>
-<ol>
-<li>Nunez, David, Malcom Smith, and Boris Bellalta. 
-"<em>Multi-AP Coordinated Spatial Reuse for Wi-Fi 8: Group Creation and Scheduling.</em>"
-arXiv preprint arXiv:2305.04846 (2023).</li>
-<li>Merlin, Simone, et al. "<em>TGax simulation scenarios.</em>" IEEE802 (2015): 11-14.</li>
-</ol></div>
+<ul>
+<li>
+<p>“Meraki Dashboard API Python Library”, 
+   Cisco Meraki, GitHub, https://github.com/meraki/dashboard-api-python. 
+   Accessed 16 July 2023.</p>
+</li>
+<li>
+<p>“pypacker”, Michael Stahn, GitLab, https://gitlab.com/mike01/pypacker. 
+   Accessed 16 July 2023.</p>
+</li>
+</ul></div>
         <hr />
     </div>
 		
@@ -200,6 +276,7 @@ arXiv preprint arXiv:2305.04846 (2023).</li>
     <li class=""><a href="https://castogio.github.io/category/802114.html">4</a></li>
     <li class=""><a href="https://castogio.github.io/category/802115.html">5</a></li>
     <li class=""><a href="https://castogio.github.io/category/802116.html">6</a></li>
+    <li class=""><a href="https://castogio.github.io/category/802117.html">7</a></li>
 
     <li class="next"><a href="https://castogio.github.io/category/802112.html">Next &rarr;</a></li>
 
