@@ -59,8 +59,8 @@
 
     <div class='article'>
         <div class="content-title">
-            <a href="https://castogio.github.io/pybeaconvalidator-a-project-idea.html"><h1>PyBeaconValidator: a project idea</h1></a>
-Sun 16 July 2023
+            <a href="https://castogio.github.io/effective-isotropic-radiated-power-eirp-explained.html"><h1>Effective Isotropic Radiated Power (EIRP) explained</h1></a>
+Sat 05 August 2023
 
 by <a class="url fn" href="https://castogio.github.io/author/gioacchino-castorio.html">Gioacchino Castorio</a>
  
@@ -69,199 +69,113 @@ by <a class="url fn" href="https://castogio.github.io/author/gioacchino-castorio
  
         </div>
         
-        <div><p>I have recently completed a one-week course on advanced Python programming, and
-wanted to make something useful with the newly acquired knowledge to simplify
-the management of my wireless laboratory.</p>
-<p>I created the first iteration of <strong>PyBeaconValidator</strong>, a CLI program that can 
-parse monitor mode packet captures, select the Beacon management frames, extract
-the content of their Information Elements, and match them with the
-configuration specified on the Cisco Meraki Dashboard. The program allows to 
-validate if the AP is operating as per its configuration without opening the
-Dashboard webpage. This is very helpful in my laboratory when conducting 
-experiments as the APs may not fetch new configurations due to the lack of
-Internet reachability or otherwise operate incorrectly due to a defect. As a 
-side-effect, the program could also confirm if the Beacons are being spoofed.</p>
-<p>The readers can find the GitHub repository at
-<a href="https://github.com/castogio/pybeaconvalidator">this link</a>. The project is 
-at a very early stage, but it already has all the components that will be used
-for the "usable" version. The program is released as a <em>Free/Libre Software</em> 
-with a <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GNU GPLv3 software license</a>.</p>
-<h2>Forewords</h2>
-<p>PyBeaconValidator heavily relies on the Cisco Meraki API for accessing the
-configuration of the APs on the Dashboard. Having access to a working Dashboard,
-administrators can enable the API access under <strong>Organization &gt; Settings &gt; Dashboard API access</strong> 
-by selecting the tickbox. After enabling the API, an API
-key (i.e. an access token) can be created under <strong>My Profile</strong>. More information
-can be found at <a href="https://documentation.meraki.com/General_Administration/Other_Topics/Cisco_Meraki_Dashboard_API">this link</a>.</p>
-<p>The user needs to have the following dependencies installed from PyPI:
-- The <a href="https://github.com/meraki/dashboard-api-python">dashboard-api-python by Cisco Meraki</a>, 
-  which provides all the current Dashboard API endpoints.
-- <a href="https://gitlab.com/mike01/pypacker">pypacker</a> a very slim low-level packet
-  manipulation library for Python.</p>
-<p>The program requires the use of Python 3.11 (or superior) to work correctly, and
-I encourage using a virtual environment, such as <strong>pipenv</strong> (used for the project)
-or <strong>poetry</strong> for better handling of the dependencies. Using pipenv the install 
-procedure looks like the following:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>&lt;PATH-TO-PROJECT&gt;/pybeaconvalidator
-pipenv<span class="w"> </span>--python<span class="w"> </span><span class="s1">&#39;3.11&#39;</span><span class="w"> </span><span class="c1"># create pipenv environement</span>
-pipenv<span class="w"> </span>install<span class="w"> </span>meraki
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>python3.11-dev
-pipenv<span class="w"> </span>install<span class="w"> </span>pypacker<span class="w"> </span>netifaces
-pipenv<span class="w"> </span>shell<span class="w"> </span><span class="c1"># enable pipenv environment</span>
-</code></pre></div>
-
-<p>I am developing the tool on a Trisquel GNU/Linux-libre machine (x86_64).
-I intend to test the tool on Apple macOS down the line and, potentially, adapt
-it to Microsoft Windows.</p>
-<h2>High-level Program Workflow</h2>
-<p>The idea behind the project is fairly simple, so I wanted the user workflow
-to be simple as well.</p>
-<p>The user needs to know their API key as described previously and it should
-specified in the program shell environment as follows:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">MERAKI_DASHBOARD_API_KEY</span><span class="o">=</span>&lt;your-api-key&gt;
-</code></pre></div>
-
-<p>PyBeaconValidator also assumes the user captured a monitor mode packet capture to be
-analysed in <em>.pcap</em> format, for instance, taken on a MacBook using the wireless
-sniffer tool. I decided not to integrate the capture function into the program as 
-it would increase the complexity and often the wireless network card of the
-host machine would not be able to take monitor mode pcaps anyway.</p>
-<p>Once the above is cleared, PyBeaconValidator executes the following steps:</p>
-<ol>
-<li>The program reads the Cisco Meraki Network ID from the program arguments; the same
-   is done to the path to the capture file.</li>
-<li>The program retrieves the details of the APs in the wireless network, such as the name,
-   serial number, model, MAC address, and tags.</li>
-<li>The program retrieves the BSSID data for each AP. The information will be matched with
-   the Transmitter Address (TA) of the Beacons so that the program can identify
-   which unit is broadcasting the frame.</li>
-<li>The program retrieves the configuration for all the SSIDs in the network. The Cisco
-   Meraki Dashboard allows configuring up to 15 SSIDs at the time of this post.</li>
-<li>The program parses the packet capture, filtering the Beacon management frames only and
-   extracting their information, such as the TA, the channel (from the RadioTap 
-   header), the SSID name, and the Supported Rates Information Element (IE).
-   The extracted IEs are ones I need at the moment, but more might be added in the
-   future, feel free to contribute on GitHub.</li>
-<li>The program creates a list of pairs for each network configuration containing
-   the <em>expected</em> value as configured on Dashboard and the <em>actual</em> value
-   advertised in the beacon frames in the packet capture.</li>
-<li>If there is a mismatch between the expected and the actual value,
-   the program alerts the user with a warning on the screen.</li>
-</ol>
-<p>The sequence diagram below shows the high-level workflow described previously:</p>
+        <div><p>In this post, I would like to discuss a topic that surprisingly has kept
+coming over and over in the discussions with my customers: the difference
+between the concepts of Transmit (TX) Power and the Effective Isotropic
+Radiated Power (EIRP). People tend to confuse the two terms and this
+create a lot of headaches when it comes to troubleshooting tickets relating to
+poor signal quality.</p>
+<h2>Glossary</h2>
+<p>Let's clarify immediately some of the terms that will show up later in the post:</p>
+<ul>
+<li><strong>TX Power</strong>: it is the amount of power measured in Watts (W) at the output 
+   of a transmitter.</li>
+<li><strong>Loss/Attenuation</strong>: it is the decrease of strength in a signal propagating
+  through a physical medium. An example is Free-Space Path Loss (FSPL) is
+  observed at the receiver after the signal propagates through free space
+  (normally air) and it increases with the distance between the transmitter and 
+  the receiver. Cables and waveguides introduce losses.</li>
+</ul>
+<!-- - **Intentional Radiator** (IR): as defined in the FCC Code of Federal
+  Regulations (CFR) Part 15, an IR is a device that _intentionally_ generates and
+  emits radio frequency energy by radiation or induction. This is a very broad
+  definition and it is better understood by negation. Something that emits RF
+  energy as a byproduct of its internal operations without explicitly being
+  designed to do so does not qualify as an IR. An Access Point (AP) is an IR, 
+  while a rotating coil generating in a factory causing interference is not an IR. -->
+<ul>
+<li><strong>Isotropic Antenna</strong>: it is a point antenna transmitting, and receiving, 
+  signal equally in all directions. It is impossible to create such kind of
+  antenna in real life, so we use it as a reference.</li>
+</ul>
+<h2>Antenna Gain</h2>
+<p>The Antenna Gain is the increase in transmitted (or received) signal
+strength due to the antenna focusing the RF energy towards a direction. 
+This gain is passive as the antenna does not add more external power to the
+signal as an RF amplifier would (i.e. we do not need to power up an antenna). 
+The direction of maximum gain is usually called <em>Antenna Boresight</em>. </p>
+<p>The gain G is an adimensional scalar computed as a ratio:</p>
 <!-- 
-@startuml PyBeaconValidator
-actor User as u #red
-participant PyBeaconValidator as pr 
-participant "Cisco Meraki Cloud" as mc #LightGreen
-database "FileSystem" as fs
-
-u->pr: network_id, pcap_path
-pr->mc: get_all_aps(network_id)
-pr<--mc: list[access_point]
-loop for each access_point
-    pr->mc: get_all_bssids(access_point)
-    pr<--mc: list[bssid]
-end
-pr->mc: get_all_ssid_config(network_id)
-pr<--mc: list[ssid_config]
-pr->fs: read_file(pcap_path)
-pr<--fs: pcap_file
-pr->pr: parse pcap_file
-pr->pr: compare(expected, actual)
-u<--pr: show mismatches
-@enduml
+    https://latexeditor.lagrida.com/
+    G = \frac{P_{rx}}{P_{rx,i}}
 -->
 
-<p><img alt="PyBeaconValidator sequence diagram" src="https://castogio.github.io/images/pybeaconvalidator_presentation/pybeaconvalidator_seq_diagram.png"></p>
-<h2>Exemple of execution</h2>
-<p>The User Interface of PyBeaconValidator in this first iteration is still fairly
-minimal; however, it allows to execute test runs for debugging quite easily
-with minimal user interaction as the commands can be issued automatically by
-programming editors such as VSCodium or Vim. You can run the program from
-the shell as follows:</p>
-<p><img alt="PyBeaconValidator command" src="https://castogio.github.io/images/pybeaconvalidator_presentation/running_program.png"></p>
-<p>At the moment, the output is silent if there is no mismatch. I created an
-"artificial" mismatch by blocking the traffic from the APs to the Cisco Meraki
-Cloud using a firewall and then changing the <em>minimum</em> (basic) bitrate configuration.
-As shown in the screenshot below, the program shows a <em>WARNING</em> log for the
-mismatch containing the timestamp (ts) of the beacon in the file, the Serial
-Number (sn) of the AP in question, the BSSID and the expected vs. actual (seen)
-values for the bitrate:</p>
-<p><img alt="Minimum bitrate mismatch warning" src="https://castogio.github.io/images/pybeaconvalidator_presentation/output.png"></p>
-<h2>Frame processing insights</h2>
-<p>I selected <em>pypacker</em> as the capture parser among other alternatives as it seems 
-to be the fastest library available at the moment. I gave a go to
-<a href="https://github.com/KimiNewt/pyshark">pyshark</a>, which is a Python wrapper for
-<a href="https://man.archlinux.org/man/tshark.1">tshark</a>, but it was unbearably slow
-even for small captures.</p>
-<p>The following code snippet shows how the beacons are extracted from the capture 
-file in the program when using Pypacker:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">pypacker</span> <span class="kn">import</span> <span class="n">ppcap</span>
-<span class="kn">from</span> <span class="nn">pypacker.layer12</span> <span class="kn">import</span> <span class="n">radiotap</span><span class="p">,</span> <span class="n">ieee80211</span>
+<p><center>
+    <img alt="Antenna Gain definition" src="https://castogio.github.io/images/eirp_explained/gain_formula.png">
+</center></p>
+<p>where P<sub>rx,i</sub> is the power of a sample signal received at an isotropic
+antenna, while P<sub>rx</sub> is the power of the same sample signal received
+at the antenna for which we are computing the gain. The Wikipedia article 
+describing <a href="https://en.wikipedia.org/wiki/Gain_(antenna)">Atenna Gains</a> 
+shows the image below (public domain) to represent how a directional antenna
+radiates the same power as an isotropic radiator, while focusing it on a specific
+direction:</p>
+<!-- https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Antenna_directive_gain_diagram.svg/2560px-Antenna_directive_gain_diagram.svg.png -->
 
-<span class="o">...</span>
+<p><center>
+    <img alt="Wikipedia Antenna Gain example" src="https://castogio.github.io/images/eirp_explained/wikipedia_antenna_gain_image.png">
+</center></p>
+<p>In the logarithmic scale, the gain is expressed in <em>dBi</em> (with 0 dBi meaning
+that the antenna is isotropic as the ratio equals 1).</p>
+<h2>Computing the EIRP</h2>
+<p>In my previous blog post <a href="https://castogio.github.io/introduction-to-rx-sop-configuration.html">Introduction to RX-SOP Configuration</a>, I already described at a high level how to compute the power at the
+receiver (RX) when the only relevant effect is FSPL, but I abused the 
+notation P<sub>tx</sub> to refer to the power at the transmitter antenna.
+I should have used the EIRP which is defined as follows:</p>
+<!-- 
+    https://latexeditor.lagrida.com/
+    EIRP=\frac{P_{TX}*G_{tx,i}*G_{txbf}}{L_c} 
+-->
 
-<span class="n">beacons</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
-<span class="k">with</span> <span class="n">ppcap</span><span class="o">.</span><span class="n">Reader</span><span class="p">(</span><span class="n">capture_file_path</span><span class="p">)</span> <span class="k">as</span> <span class="n">capture_reader</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">ts_ns</span><span class="p">,</span> <span class="n">buf</span> <span class="ow">in</span> <span class="n">capture_reader</span><span class="p">:</span>
-
-        <span class="c1"># all the frames in the .pcap file are incapsulated into Radiotab</span>
-        <span class="n">frame</span> <span class="o">=</span> <span class="n">radiotap</span><span class="o">.</span><span class="n">Radiotap</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
-
-        <span class="c1"># decapsulate the Radiotap, IEEE802.11 header and the Beacon payload</span>
-        <span class="n">radiotap_header</span><span class="p">,</span> <span class="n">dot11_header</span><span class="p">,</span> <span class="n">beacon_payload</span> <span class="o">=</span> <span class="n">frame</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> 
-                                                              <span class="n">ieee80211</span><span class="o">.</span><span class="n">IEEE80211</span><span class="p">,</span> 
-                                                              <span class="n">ieee80211</span><span class="o">.</span><span class="n">IEEE80211</span><span class="o">.</span><span class="n">Beacon</span><span class="p">]</span>
-
-        <span class="c1"># the frame is not a Beacon, the payload is None</span>
-        <span class="k">if</span> <span class="n">beacon_payload</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">continue</span> <span class="c1"># skip frame and go to the next one</span>
-
-        <span class="c1"># extract all required the fields from the Beacon frame</span>
-        <span class="n">beacon_frame</span> <span class="o">=</span> <span class="n">_process_pypacker_frame_headers</span><span class="p">(</span><span class="n">radiotap_header</span><span class="p">,</span>
-                                                       <span class="n">dot11_header</span><span class="p">,</span> 
-                                                       <span class="n">beacon_header</span><span class="p">,</span> <span class="n">ts_ns</span><span class="p">)</span>
-        <span class="n">beacons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">beacon_frame</span><span class="p">)</span>
-</code></pre></div>
-
-<p>Despite the conceptual simplicity of Pypacker's programming interface, it
-offloads much of the responsibility of parsing of the raw byte content of the IEs
-to the programmer. This behaviour gives more freedom to the programmer, but
-it increases the difficulty in analysing the most common IE, such as the
-Supported Rates. As you can see in the snippet below the computation required on
-the byte octets in the IE (each one refers to a supported rate):</p>
-<div class="highlight"><pre><span></span><code><span class="n">supported_rates_ie</span> <span class="o">=</span> <span class="n">beacon_header</span><span class="o">.</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-<span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">supported_rates_ie</span><span class="o">.</span><span class="n">body_bytes</span><span class="p">:</span>
-
-    <span class="c1"># check if the bitrate value refers to a BASIC bitrate by checking the</span>
-    <span class="c1"># first bit of the octect e.g. 1000 0000 --&gt; Basic Bitrate</span>
-    <span class="n">is_mandatory</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">b</span> <span class="o">&gt;&gt;</span> <span class="mi">7</span><span class="p">)</span>
-
-    <span class="c1"># compute bitrate in Mbps by multiplying octect</span>
-    <span class="c1"># remove if 1st bit in case of mandatory bitrate</span>
-    <span class="c1"># bitrate = (octect * 500 kbps) // 1000</span>
-    <span class="n">bitrate</span> <span class="o">=</span> <span class="p">((</span><span class="n">b</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">7</span><span class="p">))</span> <span class="k">if</span> <span class="n">is_mandatory</span> <span class="k">else</span> <span class="n">b</span><span class="p">)</span> <span class="o">//</span> <span class="mi">2</span>
-</code></pre></div>
-
-<h2>Frame processing insights</h2>
-<p>This project is still at a very early stage and I intend to go ahead adding
-more and more features over time. I consider it a great opportunity to get
-hands-on experience with frame processing and learn more about network
-automation in Python. PyBeaconValidator is freely available on GitHub so the
-readers can download the source code, study it, modify and redistribute their
-copies.</p>
+<p><center>
+    <img alt="EIRP definition (linear scale)" src="https://castogio.github.io/images/eirp_explained/eirp_formula.png">
+</center></p>
+<p>where P<sub>TX</sub> is the TX Power, G<sub>tx,i</sub> is the transmit antenna
+gain with respect to the isotropic antenna, G<sub>txbf</sub> is the transmit 
+beamforming gain, and L<sub>c</sub> is the loss due to the cable between the 
+transmitter and the antenna. The beamforming gain is obtained in a 
+Multiple-Input Multiple-Output (MIMO) system that focuses the RF power on a specific direction
+combining the effect of multiple antennas transmitting at the same time with a 
+constructive effect.
+The EIRP formula can be expressed in decibels-to-milliwatt (dBm)
+as follows:</p>
+<!-- EIRP~(dBm) = P_{TX}~(dBm)~+~G_{tx}~(dBi)~+~G_{txbf}~(dB)~-~L_c~(dB) -->
+<p><center>
+    <img alt="EIRP definition (decibel scale)" src="https://castogio.github.io/images/eirp_explained/dbm_eirp_formula.png">
+</center></p>
+<p>It is common to find in datasheets and regulatory domain documents EIRP values
+expressed as a number in dBm followed by <em>e.i.r.p.</em> (for instance, 20 dBm e.i.r.p.).</p>
+<h2>Why EIRP matters?</h2>
+<p>Now that the reader has a clearer idea of what EIRP is and how it correlates to
+the TX power, we can explore how these two concepts influence our day-to-day. </p>
+<p>ETSI EN 300 328 v2.2 Section 4.3.2.2.3 set the power limit for 
+non-Frequency Hopping Spread Spectrum wideband data transmission equipment, such
+as 802.11 stations to be less or equal to 20 dBm e.i.r.p. in Europe. Section 5.3.2.2.4 
+further specifies that in case a beamforming gain exists, it should be taken
+into account for testing the equipment in the ETSI domain.</p>
+<p>The above represents a constraint to the maximum TX power our APs can use.
+Once we pick an antenna for our station, we will need to guarantee that the TX
+power and the Transmit Beamforming gain (if the latter is used in the transmission)
+do not go above the specified limit. For instance, if our AP has an internal
+antenna (no cable loss) with a 5 dBi and we know we get a 3 dB beamforming gain in our transmission,
+then the maximum TX power in Europe must be less or equal to 12 dBm.</p>
 <h2>References</h2>
 <ul>
-<li>
-<p>“Meraki Dashboard API Python Library”, 
-   Cisco Meraki, GitHub, https://github.com/meraki/dashboard-api-python. 
-   Accessed 16 July 2023.</p>
-</li>
-<li>
-<p>“pypacker”, Michael Stahn, GitLab, https://gitlab.com/mike01/pypacker. 
-   Accessed 16 July 2023.</p>
-</li>
+<li>Coleman D.D., Westcott D.A. CWNA Certified Wireless Network Administrator
+  Study Guide: Exam CWNA-107, Chapters 3 and 4, 5th Edition: Sybex. 2018.</li>
+<li>Haykin S., Moher M. Communication Systems, Chapter 6, 5th Edition: Wiley. 2010.</li>
+<li>Gain (antenna). (2023, March 28). Wikipedia. https://en.wikipedia.org/wiki/Gain_(antenna)</li>
+<li>ETSI, EN. "300 328 V2. 2.2 (2019-07)." Wideband transmission systems (2019).</li>
 </ul></div>
         <hr />
     </div>
@@ -278,6 +192,7 @@ copies.</p>
     <li class=""><a href="https://castogio.github.io/index6.html">6</a></li>
     <li class=""><a href="https://castogio.github.io/index7.html">7</a></li>
     <li class=""><a href="https://castogio.github.io/index8.html">8</a></li>
+    <li class=""><a href="https://castogio.github.io/index9.html">9</a></li>
 
     <li class="next"><a href="https://castogio.github.io/index2.html">Next &rarr;</a></li>
 
