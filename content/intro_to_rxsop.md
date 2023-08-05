@@ -2,32 +2,32 @@ Title: Introduction to RX-SOP Configuration
 Date: 2023-05-01 12:00
 Category: 802.11
 
-Cisco Receiver Start of Packet Detection Threshold (RX-SOP) is 
+The Cisco Receiver Start of Packet Detection Threshold (RX-SOP) is 
 a feature available on a multitude of enterprise access points, but experience 
-taught me it is often misunderstood by junior wireless engineers.
+taught me junior wireless engineers often misunderstand it.
 
 In a sentence, the RX-SOP configuration declares the Wi-Fi power required for an 
 access point to pick up signals, demodulation and then start decoding the 
 physical layer protocol data unit (PPDU). 
 This definition begs the question: why is such a feature required?
-I believe that having a clear picture of how signal decay 
+Having a clear picture of how signal decay 
 over distance is necessary to understand the implications of RX-SOP.
 ​
 ## RF propagation refresher
 ​
 We call an "isotropic radiator" an intentional radiator (IR) with no spatial 
 dimensions (i.e. a dot) in the infinite void, emitting a wave
-signal of amplitude P(tx) in all directions. This entity is, of course, ideal 
-and it cannot be implemented in real life., but it will help us describe
+signal of amplitude P(tx) in all directions. This entity is, of course, ideal,
+and it cannot be implemented in real life, but it will help us describe
 the behaviour of radiation moving through space. 
 
 <!-- The power emitted is maximum at the IR and equal to P(tx).  -->
-A receiver at distance _d_ for the IR would see a different power level 
+A receiver at a distance _d_ for the IR would see a different power level 
 _strictly less_ than P(tx), as the transmitted amount spreads 
 to all directions; we can name the received power P(rx).
 In the case of an isotropic IR, we can easily compute P(rx)
 as the power spreads over a spherical wavefront.
-The _power density I_ at distance _d_ on a punctiform section of the sphere
+The _power density I_ at a distance _d_ on a punctiform section of the sphere
 is defined as follows:
 ​
 <!-- I = \frac{P_{tx}}{2\pi d^{2}} -->
@@ -36,7 +36,7 @@ is defined as follows:
 </center>
 
 In other words, the value "I" represents how the transmitted power distributes 
-in a point at distance _d_ from the IR. It also lets us compute how much power 
+in a point at a distance _d_ from the IR. It also lets us compute how much power 
 P(rx) can be captured by a punctiform section of the receiving antenna. 
 
 Multiplying _I_ by the _effective area_ of the antenna will
@@ -80,7 +80,7 @@ There is a power level called "sensitivity," which is the signal strength
 the background noise and process successfully.
 RX-SOP does not alter the sensitivity of your access point. On the other hand, 
 changing the RX-SOP level forces the AP to _actively ignore_ signals below a 
-certain power in dBm. For instance, Cisco Meraki APs use -95 dBm by default when
+specific power in dBm. For instance, Cisco Meraki APs use -95 dBm by default when
 enabled on the Dashboard.
 
 <center>
@@ -89,7 +89,7 @@ enabled on the Dashboard.
 
 
 The described concept may sound familiar to those of you who are amateur radio
-operators as this is a form of 
+operators, as this is a form of 
 "[carrier squelch](https://en.wikipedia.org/wiki/Squelch)", 
 i.e. suppressing the receiver output if the input signal is not strong enough. 
 You can see the effects of RX-SOP muting when the level is set to -70 dBm:
@@ -110,7 +110,7 @@ You can see the effects of RX-SOP muting when the level is set to -70 dBm:
     ![RX-SOP operatiomns]({static}/images/rxsop_intro/rx_sop_operation.png)
 </center>
 ​
-Quoting from Cisco, this feature is "ideal for high-density environments [...]
+Quoting from the Cisco documentation, this feature is "ideal for high-density environments [...]
 where there are a large number of client devices connected per AP [... where
 ...] the smaller the cell size, the better."
 ​
@@ -120,8 +120,8 @@ threshold so that it can start transmitting relatively more frequently.
 ​
 I saw this configuration altered in the wild by inexperienced administrators and 
 troubleshooters without properly validating its effect on the environment,
-especially to address the issue of sticky clients. The latter is not advisable:
-the RX-SOP is a receive-only configuration and it applies **only** to the AP
+primarily to address the issue of sticky clients. The latter is not advisable:
+the RX-SOP is a receive-only configuration, and it applies **only** to the AP
 side, while the client will continue receiving transmissions from the AP
 as if nothing changed. The client may send a frame using its estimated 
 "correct" power level for the AP to receive, while the AP ignores
@@ -130,7 +130,7 @@ behaviour may lead to excessive retransmissions and client disconnections in
 the worst scenarios, especially at the boundary of the cell coverage where the
 asymmetry may be felt the most.
 A better result in reducing _bidirectionally_ the cell size
-could have been accomplished by simply reducing the AP transmit power, while 
+could have been accomplished by simply reducing the AP transmit power while 
 guaranteeing appropriate primary and secondary coverage.
 ​
 ## Final remarks
