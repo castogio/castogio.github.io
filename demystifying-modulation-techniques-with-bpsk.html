@@ -84,7 +84,7 @@ by comparing what is received with the reference signal,
 which is assumed to be known. 
 The figure below shows the comparison between the reference signal and what can 
 be seen at the receiving station, considering path loss exclusively and ignoring
-additional effects such as multipath; the picture shows a one being received,
+additional effects such as multipath; the picture shows a "one" being received,
 followed by a zero.</p>
 <p><center>
     <img alt="periodic" src="https://castogio.github.io/images/modulation_tech/bpsk_periodic_zero_received_vs_reference.png">
@@ -92,8 +92,8 @@ followed by a zero.</p>
 <p>The carrier signal s(t) is not enough to transmit any meaningful
 information in real life: the time variable t is an infinite
 <a href="https://en.wikipedia.org/wiki/Real_number">real number</a> and s(t) repeats
-periodically with no start or end in time. We are busy people and we want
-to transmit more than one bit in perpetuity, so we can define a new rectangular
+periodically with no start or end in time. We are busy people, and we want
+to transmit more than one bit in perpetuity: we can define a new rectangular
 function <em>p(t)</em> which is not-null only for <em>0 &lt;= t &lt;= T</em>, where <em>T = 1/f</em> is the
 "period" of the signal s(t). </p>
 <!-- 
@@ -107,7 +107,7 @@ p(t) =\begin{cases}
     <img alt="rectangular function" src="https://castogio.github.io/images/modulation_tech/rect_function.png">
 </center></p>
 <p>Multiplying the two functions <em>g(t) = s(t)p(t)</em>, we get a limited section of the
-original signal, namely a cycle of the cosine wave.</p>
+the original signal, namely a cycle of the cosine wave.</p>
 <p><center>
     <img alt="Windowed cosine" src="https://castogio.github.io/images/modulation_tech/windowed_signal.png">
 </center></p>
@@ -117,7 +117,7 @@ over the time axis so that p(t-kT) = 1 for kT &lt;= t &lt;= (k+1)T, where k is a
 <a href="https://en.wikipedia.org/wiki/Integer">integer number</a>. We can shift the
 pulse <em>g(t)</em> by <em>kT</em> as well.</p>
 <p>The windowed signals can be juxtaposed to represent a sequence of 0's and 1's
-fairly easily as the entire signal can be described mathematically as a
+fairly easily. The resulting signal can be described mathematically as a
 summation <em>S(t)</em>, where N is the number of windows and the coefficient
 <em>c</em> is 1 when transmitting a "one" bit, -1 otherwise.</p>
 <!-- 
