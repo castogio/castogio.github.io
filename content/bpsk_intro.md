@@ -26,7 +26,7 @@ by comparing what is received with the reference signal,
 which is assumed to be known. 
 The figure below shows the comparison between the reference signal and what can 
 be seen at the receiving station, considering path loss exclusively and ignoring
-additional effects such as multipath; the picture shows a one being received,
+additional effects such as multipath; the picture shows a "one" being received,
 followed by a zero.
 
 <center>
@@ -36,8 +36,8 @@ followed by a zero.
 The carrier signal s(t) is not enough to transmit any meaningful
 information in real life: the time variable t is an infinite
 [real number](https://en.wikipedia.org/wiki/Real_number) and s(t) repeats
-periodically with no start or end in time. We are busy people and we want
-to transmit more than one bit in perpetuity, so we can define a new rectangular
+periodically with no start or end in time. We are busy people, and we want
+to transmit more than one bit in perpetuity: we can define a new rectangular
 function _p(t)_ which is not-null only for _0 <= t <= T_, where _T = 1/f_ is the
 "period" of the signal s(t). 
 
@@ -54,7 +54,7 @@ p(t) =\begin{cases}
 </center>
 
 Multiplying the two functions _g(t) = s(t)p(t)_, we get a limited section of the
-original signal, namely a cycle of the cosine wave.
+the original signal, namely a cycle of the cosine wave.
 
 <center>
     ![Windowed cosine]({static}/images/modulation_tech/windowed_signal.png)
@@ -67,7 +67,7 @@ over the time axis so that p(t-kT) = 1 for kT <= t <= (k+1)T, where k is any
 pulse _g(t)_ by _kT_ as well.
 
 The windowed signals can be juxtaposed to represent a sequence of 0's and 1's
-fairly easily as the entire signal can be described mathematically as a
+fairly easily. The resulting signal can be described mathematically as a
 summation _S(t)_, where N is the number of windows and the coefficient
 _c_ is 1 when transmitting a "one" bit, -1 otherwise.
 
