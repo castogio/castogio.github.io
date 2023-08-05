@@ -2,29 +2,29 @@ Title: R&D sneak peek: Multi-AP Coordinated Spatial Reuse for Wi-Fi 8
 Date: 2023-06-14 18:00
 Category: 802.11
 
-In this post, I would like to describe an interesting take on Multi-AP 
+In this post, I would like to describe an exciting take on Multi-AP 
 Coordination (MAPC) leveraging Spatial Reuse (SR). AP coordination has groups of
 APs communicate with each other to minimise collisions while transmitting at the
 same time and on the same frequency channel. I recently came across a scientific
 article by David Nunez et al. in [1], which I believe is worth understanding as it
-proposes an algorithm to identify coordinated AP groups and schedule
-transmissions of their buffered frames at the same time.
+proposes an algorithm to identify coordinated AP groups and simultaneously schedule
+transmissions of their buffered frames.
 
 ## What is Spatial Reuse?
 
 Spatial Reuse is not a new concept in wireless communications. If a transmitter
 is “distant” enough from other transmitters on the same channel, it can consider
-them as background noise when communicating with its intended clients. Think
+them background noise when communicating with its intended clients. Think
 about yourself speaking in English to an audience in a large garden. Other
 people can do the same 20 yards away from yours and each other’s groups if
-everyone agrees to be well-behaved. Communication is possible because sound is
+everyone agrees to be well-behaved. Communication is possible because the sound is
 affected by Path Loss; the same can be applied to 802.11 wireless communication
 when considering a model such as the TGax model for Enterprise Scenarios [2]
-which takes into account the distance between the transmitter and receiver, the
+which considers the distance between the transmitter and receiver, the
 frequency used and the number of walls. The mathematical details are not
 interesting for understanding the concept, but you may appreciate how being in a
 harsh RF environment causing strong attenuation can reduce the reuse distance.
-The picture below shows a client station, called STA, being able to hear 
+The picture below shows a client station called STA, being able to hear 
 AP<sub>4</sub> and AP<sub>5</sub> on the same channel used by AP<sub>2</sub>
 to which it is connected.
 
@@ -36,7 +36,7 @@ AP4 and AP5 are interferers and contribute to the effect of background noise in
 the communications from AP<sub>2</sub>, potentially preventing STA from
 receiving readable signals. The effect of background noise and interference over
 the useful signal is described by the following formula for the Signal to
-Interference plus Noise Ratio (SINR) as seen on the client STA for the
+Interference plus Noise Ratio (SINR), as seen on the client STA for the
 transmission from AP<sub>2</sub>:
 
 <!-- SINR_{STA}^{2} = \frac{P_2}{N + \sum_{j \neq 2} P_{j}} -->
@@ -81,7 +81,7 @@ is always symmetric so that the power the client receives in transmissions from
 the AP (downlink) is the same as the AP receives from the client on the way back
 (uplink). In light of this, all the APs in the same coordinated group of size
 M must guarantee that their SINR for each of their connected client STAs is
-above an m threshold, so that:
+above an m threshold so that:
 
 <!-- \min_{j=1...M}SINR_{STA}^{j} \geqslant m -->
 <center>
@@ -96,9 +96,9 @@ high enough for all the client STAs connected to APs already in the group.
 
 ## Traffic Scheduling Algorithms
 
-The operation can be repeated using different reference APs so that multiple
-groups of “compatible” APs can be found. APs that are located in better
-positions (or trivially far enough) may end up belonging to multiple groups.
+The operation can be repeated using different reference APs to find multiple
+groups of “compatible” APs. APs in better
+positions (or trivially far enough) may belong to various groups.
 Once the groups are identified, the CC must select what groups should transmit.
 The paper proposes four strategies based on the number of packets buffered in
 the APs of the group:
@@ -106,7 +106,7 @@ the APs of the group:
 1. _NumPkSingle_: the CC selects the groups containing the AP with the highest 
    number of buffered packets, and then picks the single group with the highest 
    number of buffered packets across all the APs in the group.
-2. _NumPkGroup_: the CC selects the group with the highest number of packets.
+2. _NumPkGroup_: the CC selects the group with the most packets.
 3. _OldOkSingle_: the CC selects the groups containing the AP with the oldest
    buffered packet, and then picks the single group with the highest aggregate
    group delay as a sum of the waiting times of the oldest buffered packets
@@ -119,7 +119,7 @@ this is particularly important whenever there are groups with just a few APs and
 others with a large number of units. The simulation results presented in the
 paper show that NumPkSingle and OldOkSingle (_per-AP selection_) outperform the
 other strategies (_per-Group selection_) when the TXOP-sharing transmissions are
-scheduled every 5 milliseconds and the SINR threshold is 20 dB, high enough to
+scheduled every 5 milliseconds, and the SINR threshold is 20 dB, high enough to
 guarantee the use of a high Modulation and Coding Scheme (MCS) in the simulation
 using 9 APs transmitting on the same channel.
 
