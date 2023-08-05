@@ -2,7 +2,7 @@ Title: Effective Isotropic Radiated Power (EIRP) explained
 Date: 2023-08-05 00:07
 Category: 802.11
 
-In this post, I would like to discuss a topic that surprisingly has kept
+In this post, I would like to discuss a topic that, surprisingly, has kept
 coming over and over in the discussions with my customers: the difference
 between the concepts of Transmit (TX) Power and the Effective Isotropic
 Radiated Power (EIRP). People tend to confuse the two terms and this
@@ -22,14 +22,14 @@ Let's clarify immediately some of the terms that will show up later in the post:
   the receiver. Cables and waveguides introduce losses.
 <!-- - **Intentional Radiator** (IR): as defined in the FCC Code of Federal
   Regulations (CFR) Part 15, an IR is a device that _intentionally_ generates and
-  emits radio frequency energy by radiation or induction. This is a very broad
-  definition and it is better understood by negation. Something that emits RF
+  emits radio frequency energy by radiation or induction. This broad definition 
+  is better understood by negation. Something that emits RF
   energy as a byproduct of its internal operations without explicitly being
   designed to do so does not qualify as an IR. An Access Point (AP) is an IR, 
   while a rotating coil generating in a factory causing interference is not an IR. -->
 - **Isotropic Antenna**: it is a point antenna transmitting, and receiving, 
-  signal equally in all directions. It is impossible to create such kind of
-  antenna in real life, so we use it as a reference.
+  signal equally in all directions. It is impossible to create such 
+  an antenna in real life, so we use it as a reference.
 
 
 
@@ -57,7 +57,7 @@ antenna, while P<sub>rx</sub> is the power of the same sample signal received
 at the antenna for which we are computing the gain. The Wikipedia article 
 describing [Atenna Gains](https://en.wikipedia.org/wiki/Gain_(antenna)) 
 shows the image below (public domain) to represent how a directional antenna
-radiates the same power as an isotropic radiator, while focusing it on a specific
+radiates the same power as an isotropic radiator while focusing it on a specific
 direction:
 
 <!-- https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Antenna_directive_gain_diagram.svg/2560px-Antenna_directive_gain_diagram.svg.png -->
@@ -74,7 +74,7 @@ that the antenna is isotropic as the ratio equals 1).
 In my previous blog post [Introduction to RX-SOP Configuration](https://castogio.github.io/introduction-to-rx-sop-configuration.html), I already described at a high level how to compute the power at the
 receiver (RX) when the only relevant effect is FSPL, but I abused the 
 notation P<sub>tx</sub> to refer to the power at the transmitter antenna.
-I should have used the EIRP which is defined as follows:
+I should have used the EIRP, which is defined as follows:
 
 <!-- 
     https://latexeditor.lagrida.com/
@@ -117,7 +117,7 @@ into account for testing the equipment in the ETSI domain.
 The above represents a constraint to the maximum TX power our APs can use.
 Once we pick an antenna for our station, we will need to guarantee that the TX
 power and the Transmit Beamforming gain (if the latter is used in the transmission)
-do not go above the specified limit. For instance, if our AP has an internal
+stay within the specified limit. For instance, if our AP has an internal
 antenna (no cable loss) with a 5 dBi and we know we get a 3 dB beamforming gain in our transmission,
 then the maximum TX power in Europe must be less or equal to 12 dBm.
 
