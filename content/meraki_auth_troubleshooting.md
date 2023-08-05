@@ -3,21 +3,21 @@ Date: 2023-04-26 23:00
 Category: 802.11
 
 <!-- write an introduction -->
-I was tinkering in my lab with my very old MacBook, now running Windows 10, 
+I was tinkering in my lab with my ancient MacBook, now running Windows 10, 
 a few days ago, looking for ways to simplify my troubleshooting activities at work.
-There is a service that the Cisco Meraki access points offer, called Meraki 
+There is a service that the Cisco Meraki access points offer called Meraki 
 Cloud Authentication, which offers an authentication server for 802.1X running
-24/7 on their server. This uses the EAP-PEAP/EAP-TLS method to authenticate
-users who provide an email username and a password. 
+24/7 on their server. It uses the EAP-PEAP/EAP-TLS method to authenticate
+users with an email username and a password. 
 
 The email requested by the server is case-sensitive. Unsurprisingly an easy way 
-to fail authentication is simply to write the correct email with one or more 
+to fail authentication is to write the correct email with one or more 
 characters in the wrong case. Another common L8 issue is, of course, typing the
-wrong password because the user forgot it.
+incorrect password because the user forgot it.
 
-In this blog post, I would like to present some useful tips to troubleshoot
+In this blog post, I would like to present some valuable tips to troubleshoot
 incorrect authentication credentials using the Event Viewer in Windows 10.
-This tool ships natively with the OS and it provides a step-by-step report of
+This tool ships natively with the OS, and it provides a step-by-step report of
 what is happening when connecting to an SSID, as it allows monitoring 
 the service called "_WLAN-AutoConfig_," in charge of the 802.11 state machine.
 
@@ -67,7 +67,7 @@ The following exchange can be seen:
 6. The server sends an EAP Success message to the client.
 7. The 4-way RSN handshake can start.
 
-NOTE: you may notice that the client wireless MAC address is translated by
+NOTE: you may notice that the client's wireless MAC address is translated by
 Wireshark as "Apple." This is expected as I was running Windows dual-booted
 on a MacBook.
 
@@ -93,19 +93,19 @@ here shown as "hello@correct.com" (just an example).
 ## Dissecting a failed authentication
 
 Despite what we have seen in the previous section, the operation may not
-be very smooth when your user report issues with "connecting with the Wi-Fi".
+be smooth when your users report issues with "connecting with the Wi-Fi".
 You may not have immediate access to your trusty sidekick
 or a different client to collect monitor mode capture. Nonetheless, you can
-still open the Event Viewer, ask the user to attempt a connection, see if fail
-miserably, and review what is being reported in the logs.
+still open the Event Viewer, ask the user to attempt a connection, see it failing
+miserably, and review what is reported in the logs.
 
 <!-- log failure -->
 <center>
     ![EAP log failure on Windows]({static}/images/meraki_auth_troubleshooting/capture_FAILURE_windows.png)
 </center>
 
-The general structure of the reports, as you can see above, did not change much
-from the _successful_ case. In particular, we can see that the client 
+As you can see above, the general structure of the reports mostly stayed the same
+when compared to the _successful_ case. In particular, we can see that the client 
 passed the Open Authentication and the Association phases, but it stalled
 when attempting the 802.1X operation.
 
@@ -114,9 +114,9 @@ WLAN-AutoConfig reports the fact that this was an _explicit_ EAP authentication
 failure and that we sent the identity "HELLO@correct.com" (which we know is 
 incorrect, as seen previously).
 
-Being in my laboratory, I could take the packet capture and indeed all the EAP 
+Being in my laboratory, I could take the packet capture and, indeed, all the EAP 
 exchanges seen previously show up again, with the sole exception of the last
-frame which contains an EAP failure message (matching what was reported in the
+frame, which contains an EAP failure message (matching what was reported in the
 Event Viewer).
 
 <!-- packet capture failure -->
@@ -124,20 +124,20 @@ Event Viewer).
     ![packet capture of EAP failure]({static}/images/meraki_auth_troubleshooting/FAIL_meraki_auth_exchange.png)
 </center>
 
-Having been burnt in the past, I would recommend you cross-check and confirm the
-reports from any facility using some additional external tools. In the scenario
+Having been burnt in the past, I recommend you cross-check and confirm the
+reports from any facility using additional external tools. In the scenario
 described in this post, the Event Viewer correctly pointed to the root cause, 
-but it might not be direct when it comes to more complex problems (also, bugs
-are a thing). Seeing an EAP failure in the packet capture confirmed the fact.  
+but it might not be direct regarding more complex problems (also, bugs
+are a thing). Seeing an EAP failure in the packet capture confirmed the fact. 
 
 ## Conclusion and Lesson Learned
 
 The main takeaway of this little demo is "_know your tools_".
-Client devices offer a multitude of built-in programs that will immensely 
-simplify your day-to-day as a wireless analyst, especially when you do not 
-have access to more sophisticated equipment. The Event Viewer is the perfect 
+Client devices offer many built-in programs that will immensely 
+simplify your day-to-day as a wireless analyst, especially when 
+you cannot access more sophisticated equipment. The Event Viewer is the perfect 
 example of a tool that ships with Windows and can show you what the client
-is doing, what **it believes** is going wrong, and, potentially, how to 
+is doing, what **it believes** is going wrong, and potentially, how to 
 remediate the issue, as in our case.
 
 
