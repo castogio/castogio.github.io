@@ -11,10 +11,10 @@ use automatic Resource Radio Management (RRM), which may prompt for
 RF environment. CSAs are also used whenever a Dynamic Frequency Selection (DFS)
 occurs in the 5 GHz band, and the AP must move to a non-radar channel.
 
-The primary goal of CSAs is to allow the AP to change its channel, while keeping
-the clients associated. Of course, the clients have to follow the AP along with 
-the change, and start transmitting on the new channel (they may actually decide
-to simply disassociate).
+The primary goal of CSAs is to allow the AP to change its channel while keeping
+the clients associated. Of course, the clients should follow the AP along with 
+the change and start transmitting on the new channel, but they may decide
+to disassociate.
 
 We will explore together the CSA procedures and the Information Element (IE) 
 formats as defined in the IEEE802.11-2020 standard, and confirm the behaviours
@@ -39,12 +39,12 @@ an Action frame before a channel switch from Ch 112 to Ch 48.
     ![CSAs frames in Wireshark]({static}/images/csa_explained/wireshark_list_frames.png)
 </center>
 
-All these frames are _broadcast_ and they carry information regarding what the
+All these frames are _broadcast_, and they carry information regarding what the
 _new channel_ will be, and they state how much time is left before the switch, 
 expressed as a multiplicative factor of the 
 TBTT (Target Beacon Transmission Time). 
 I made sure the picture shows them  in a human-friendly format by re-naming the 
-columns, but we will deep dive into the details of the IE in the next sections.
+columns, but we will do a deep dive into the details of the IE in the following sections.
 
 ## CSA Information Element format
 
@@ -61,15 +61,15 @@ AP] is changing to a new channel and the channel number of the new channel."
 
 The following fields are defined:
 
-- The _Element ID_ (1 byte) is 37.
+- The _Element ID_ (1 byte) always assumes the value 37.
 - The _Channel Switch Mode_ Field (1 byte) can assume the value _0_ when the 
-  client stations and the AP itself can continue exchanging frames before the
+  client stations and the AP can continue exchanging frames before the
   channel switch happens. If the value is _1_, no more frames should be
   exchanged before the switch.
-- The _New Channel Number_ field (1 byte) is the channel that will be used
-  by the AP after the switch (you could call it the "new channel").
+- The _New Channel Number_ field (1 byte) is the channel that the AP will
+  use after the switch (you could call it the "new channel").
 - The _Channel Switch Count_ field (1 byte) is tricky as it states how much
-  time will elapse before the channel change, and it is expressed in multiples 
+  time will elapse before the channel change. It is expressed in multiples 
   of the TBTT, which is the target amount of time between a Beacon Frame and the 
   following one for the same BSS (assuming the medium is available). A TBTT is 
   composed of 100 Time Units (TUs), which in turn is 1024 
@@ -84,7 +84,7 @@ The following fields are defined:
 
 **IEEE 802.11-2020 Section 9.4.2.52** defines the Extended Channel Switch
 Announcement IE (E-CSA IE), which specifies if the "BSS is changing to a new 
-channel in the same or a new operating class." This IE was first introduced in 
+channel in the same or a new operating class." This IE was introduced in 
 the IEEE 802.11y amendment to replace the CSA IE. The latter is still 
 broadcasted for backward compatibility.
 
@@ -111,9 +111,9 @@ simulating a DFS event in my lab network to observe what values populated the
 fields we described in the previous sections.
 
 My AP was operating on channel 112, which falls in the 
-Unlicensed National Information Infrastructure 2 Extended (U-NII-2e) range, and 
-it might be affected by DFS events. These events can be caused by radars or any
-other RF radiator mimicking radar. If an event is detected the AP must inform
+The Unlicensed National Information Infrastructure 2 Extended (U-NII-2e)
+range might be affected by DFS events caused by radars or any
+other RF radiator mimicking radar. If an event is detected, the AP must inform
 the clients that they have to stop transmitting and move to a different channel,
 usually referred to as a "mute" or "fallback" channel. The AP
 and the clients have 10 seconds to leave the DFS channel.
@@ -136,16 +136,16 @@ their association status.
     ![CapturedExtended CSA IE for DFS]({static}/images/csa_explained/extended_channel_switch_announcement_information_element.png)
 </center>
 
-The E-CSA field is contained in the same frames and it carries similar 
+The E-CSA field is contained in the same frames, and it carries similar 
 information with the addition of the "New Operating Class" equal to 0x01 
-(hexadecimal). In Europe where I live, class 1 means that the new channel 
-belongs a group composed of Channels 36, 40, 44, and 48 (i.e U-NII-1), the 
+(hexadecimal). In Europe, where I live, class 1 means that the new channel 
+belongs to a group composed of Channels 36, 40, 44, and 48 (i.e. U-NII-1), the 
 starting frequency for the group is 5 GHz, their channel spacing is 20 MHz, and
 there are no additional behaviour limits (refer to Table E-2 from the standard).
 
 ## Case Study: RRM-triggered channel changes
 
-Channel changes due to automatic RRM are another very interesting case study,
+Channel changes due to automatic RRM are another fascinating case study,
 probably more relevant than the DFS one, as RRM can kick in very frequently 
 when the RF environment is particularly harsh (e.g. high channel utilisation).
 
@@ -153,11 +153,11 @@ when the RF environment is particularly harsh (e.g. high channel utilisation).
     ![Captured CSA for RRM Channel Change]({static}/images/csa_explained/csa_channel_change.png)
 </center>
 
-The figure above shows both the CSA and E-CSA IEs when the channel is about to 
+The figure above shows the CSA and E-CSA IEs when the channel is about to 
 switch to 161. The new operating class is 0x11 (hex for 17), which in Europe 
 refers to the channel set containing 149, 153, 157, 161, 165, and 169 (also
 known as U-NII-3).
-Furthermore, note that the Channel Switch Mode is set to 0 so the 
+Furthermore, note that the Channel Switch Mode is set to 0, so the 
 clients and the AP may keep exchanging frames until the channel switch, hence 
 virtually nullifying (or minimising as much as possible) any service 
 interruptions during RRM channel switches.
