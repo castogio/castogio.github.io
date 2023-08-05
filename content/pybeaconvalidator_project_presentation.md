@@ -24,8 +24,7 @@ with a [GNU GPLv3 software license](https://www.gnu.org/licenses/gpl-3.0.en.html
 
 ## Forewords
 
-PyBeaconValidator heavily relies on the Cisco Meraki API for accessing the
-configuration of the APs on the Dashboard. Having access to a working Dashboard,
+PyBeaconValidator heavily relies on the Cisco Meraki API to access the APs' configuration on the Dashboard. Having access to a working Dashboard,
 administrators can enable the API access under **Organization > Settings > Dashboard API access** 
 by selecting the tickbox. After enabling the API, an API
 key (i.e. an access token) can be created under **My Profile**. More information
@@ -39,7 +38,7 @@ The user needs to have the following dependencies installed from PyPI:
 
 The program requires the use of Python 3.11 (or superior) to work correctly, and
 I encourage using a virtual environment, such as **pipenv** (used for the project)
-or __poetry__ for better handling of the dependencies. Using pipenv the install 
+or __poetry__ for better handling of the dependencies. The install 
 procedure looks like the following:
 
     :::bash
@@ -56,10 +55,10 @@ it to Microsoft Windows.
 
 ## High-level Program Workflow
 
-The idea behind the project is fairly simple, so I wanted the user workflow
+The idea behind the project is pretty simple, so I wanted the user workflow
 to be simple as well.
 
-The user needs to know their API key as described previously and it should
+The user needs to know their API key as described previously, and it should
 specified in the program shell environment as follows:
 
     :::bash
@@ -68,7 +67,7 @@ specified in the program shell environment as follows:
 PyBeaconValidator also assumes the user captured a monitor mode packet capture to be
 analysed in _.pcap_ format, for instance, taken on a MacBook using the wireless
 sniffer tool. I decided not to integrate the capture function into the program as 
-it would increase the complexity and often the wireless network card of the
+it would increase the complexity, and often the wireless network card of the
 host machine would not be able to take monitor mode pcaps anyway.
 
 Once the above is cleared, PyBeaconValidator executes the following steps:
@@ -85,8 +84,8 @@ Once the above is cleared, PyBeaconValidator executes the following steps:
 5. The program parses the packet capture, filtering the Beacon management frames only and
    extracting their information, such as the TA, the channel (from the RadioTap 
    header), the SSID name, and the Supported Rates Information Element (IE).
-   The extracted IEs are ones I need at the moment, but more might be added in the
-   future, feel free to contribute on GitHub.
+   I extracted only the IEs I need at the moment, but more might be added in the
+   future; feel free to contribute on GitHub.
 6. The program creates a list of pairs for each network configuration containing
    the _expected_ value as configured on Dashboard and the _actual_ value
    advertised in the beacon frames in the packet capture.
@@ -131,10 +130,10 @@ the shell as follows:
 
 ![PyBeaconValidator command]({static}/images/pybeaconvalidator_presentation/running_program.png)
 
-At the moment, the output is silent if there is no mismatch. I created an
+In the current implementation, the output is silent if there is no mismatch. I created an
 "artificial" mismatch by blocking the traffic from the APs to the Cisco Meraki
 Cloud using a firewall and then changing the _minimum_ (basic) bitrate configuration.
-As shown in the screenshot below, the program shows a _WARNING_ log for the
+As shown in the screenshot below, the program displays a _WARNING_ log for the
 mismatch containing the timestamp (ts) of the beacon in the file, the Serial
 Number (sn) of the AP in question, the BSSID and the expected vs. actual (seen)
 values for the bitrate:
@@ -143,7 +142,7 @@ values for the bitrate:
 
 ## Frame processing insights
 
-I selected _pypacker_ as the capture parser among other alternatives as it seems 
+I selected _pypacker_ as the capture parser, among other alternatives, as it seems 
 to be the fastest library available at the moment. I gave a go to
 [pyshark](https://github.com/KimiNewt/pyshark), which is a Python wrapper for
 [tshark](https://man.archlinux.org/man/tshark.1), but it was unbearably slow
@@ -181,11 +180,11 @@ file in the program when using Pypacker:
             beacons.append(beacon_frame)
 
 Despite the conceptual simplicity of Pypacker's programming interface, it
-offloads much of the responsibility of parsing of the raw byte content of the IEs
+offloads much of the responsibility of parsing the raw byte content of the IEs
 to the programmer. This behaviour gives more freedom to the programmer, but
 it increases the difficulty in analysing the most common IE, such as the
-Supported Rates. As you can see in the snippet below the computation required on
-the byte octets in the IE (each one refers to a supported rate):
+Supported Rates. As you can see in the snippet below, the computation required on
+the byte octets in the IE (each one refers to one of the supported rates):
 
     :::python
     supported_rates_ie = beacon_header.params[1]
@@ -202,10 +201,10 @@ the byte octets in the IE (each one refers to a supported rate):
 
 ## Frame processing insights
 
-This project is still at a very early stage and I intend to go ahead adding
-more and more features over time. I consider it a great opportunity to get
+This project is still at a very early stage, and I plan to add
+more and more features over time. It is an excellent opportunity to get
 hands-on experience with frame processing and learn more about network
-automation in Python. PyBeaconValidator is freely available on GitHub so the
+automation in Python. PyBeaconValidator is freely available on GitHub, so the
 readers can download the source code, study it, modify and redistribute their
 copies.
 
