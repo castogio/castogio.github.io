@@ -103,7 +103,7 @@ as follows:
 It is common to find in datasheets and regulatory domain documents EIRP values
 expressed as a number in dBm followed by _e.i.r.p._ (for instance, 20 dBm e.i.r.p.).
 
-## Why EIRP matters?
+## Why does EIRP matter?
 
 Now that the reader has a clearer idea of what EIRP is and how it correlates to
 the TX power, we can explore how these two concepts influence our day-to-day. 
