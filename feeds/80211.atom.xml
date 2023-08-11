@@ -89,7 +89,7 @@ as follows:&lt;/p&gt;
 &lt;/center&gt;&lt;/p&gt;
 &lt;p&gt;It is common to find in datasheets and regulatory domain documents EIRP values
 expressed as a number in dBm followed by &lt;em&gt;e.i.r.p.&lt;/em&gt; (for instance, 20 dBm e.i.r.p.).&lt;/p&gt;
-&lt;h2&gt;Why EIRP matters?&lt;/h2&gt;
+&lt;h2&gt;Why does EIRP matter?&lt;/h2&gt;
 &lt;p&gt;Now that the reader has a clearer idea of what EIRP is and how it correlates to
 the TX power, we can explore how these two concepts influence our day-to-day. &lt;/p&gt;
 &lt;p&gt;ETSI EN 300 328 v2.2 Section 4.3.2.2.3 set the power limit for 
